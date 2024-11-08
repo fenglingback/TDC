@@ -19,8 +19,8 @@
             ]
         },
         {
-            "title": "百度",
-            "url": "https://www.baidu.com",
+            "title": "Google",
+            "url": "https://www.google.com",
             "tags": [
                 "搜索"
             ]
@@ -36,7 +36,6 @@
             "title": "小红书",
             "url": "https://www.xiaohongshu.com",
             "tags": [
-                "社交",
                 "社区",
                 "娱乐"
             ]
