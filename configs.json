@@ -40,6 +40,14 @@
                 "社区",
                 "娱乐"
             ]
+        },
+        {
+            "title": "Github",
+            "url": "https://github.com",
+            "tags": [
+                "社区",
+                "code"
+            ]
         }
     ]
 }
