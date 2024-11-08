@@ -27,7 +27,7 @@ templateEnv = Environment(loader=templateLoader)
 template = templateEnv.get_template("index_template.html")
 
 # 将数据渲染到模板中，并将结果写入目标文件
-with open('index.html', 'w', encoding='utf-8') as f:
+with open('./index.html', 'w', encoding='utf-8') as f:
     result = template.render(all_tags=all_tags, bookmarks=bookmarks, name=name)
     f.write(result)
 
