@@ -22,3 +22,10 @@ jobs:
 
       - name: Run Python script
         run: python render.py  # 执行渲染脚本
+
+      - name: Commit changes
+        run: |
+          git config --local user.name "cxfl"
+          git config --local user.email "fenglinggod@qq.com"
+          git commit -am "Update"
+          git push
