@@ -3,6 +3,9 @@ name: Run Python Script on Any File Change
 on:
   push:  # 监控所有推送事件
 
+permissions:
+  contents: write  # 允许写入仓库内容
+
 jobs:
   run-python-script:
     runs-on: ubuntu-latest
