@@ -3,7 +3,6 @@
     --text-color: #e0e0e0;
     --accent-color: #a277ff;
     --secondary-bg: #1d2c53dc;
-    --hover-color: #915eff;
     scrollbar-width: none;
 }
 
@@ -77,10 +76,6 @@ h1 {
 .tag-btn:hover,
 .tag-btn.active {
     background-color: var(--accent-color);
-}
-
-.tag-btn.selected {
-    background-color: var(--hover-color);
 }
 
 .bookmarks-container {
