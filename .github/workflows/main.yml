@@ -1,7 +1,9 @@
 name: Run Python Script on Any File Change
 
 on:
-  push:  # 监控所有推送事件
+  push:
+    branches:
+      - main
 
 permissions:
   contents: write  # 允许写入仓库内容
@@ -33,7 +35,7 @@ jobs:
           git commit -am "Update"
           git push
           
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          folder: build # The folder the action should deploy.
