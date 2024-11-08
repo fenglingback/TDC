@@ -1,0 +1,45 @@
+{
+    "Name": "我的书签",
+    "Bookmarks": [
+        {
+            "title": "微博",
+            "url": "https://www.weibo.com",
+            "tags": [
+                "社交",
+                "社区",
+                "娱乐"
+            ]
+        },
+        {
+            "title": "抖音",
+            "url": "https://www.douyin.com",
+            "tags": [
+                "社交",
+                "娱乐"
+            ]
+        },
+        {
+            "title": "百度",
+            "url": "https://www.baidu.com",
+            "tags": [
+                "搜索"
+            ]
+        },
+        {
+            "title": "哔哩哔哩",
+            "url": "https://www.bilibili.com",
+            "tags": [
+                "短视频"
+            ]
+        },
+        {
+            "title": "小红书",
+            "url": "https://www.xiaohongshu.com",
+            "tags": [
+                "社交",
+                "社区",
+                "娱乐"
+            ]
+        }
+    ]
+}
