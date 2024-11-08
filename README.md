@@ -1,2 +1,2 @@
 # TDC
-Tag-driven collectors
+Tag-driven Collector
