@@ -32,3 +32,8 @@ jobs:
           git config --local user.email "fenglinggod@qq.com"
           git commit -am "Update"
           git push
+          
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
