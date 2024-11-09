@@ -12,7 +12,7 @@ bookmarks = data['Bookmarks']
 # print(bookmarks)
 
 # 获取所有标签
-all_tags = list({tag for bookmark in bookmarks for tag in bookmark['tags']})
+all_tags = sorted({tag for bookmark in bookmarks for tag in bookmark['tags']})
 # print(all_tags)
 
 
