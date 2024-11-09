@@ -20,11 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         bookmarks.forEach(bookmark => {
             const title = bookmark.querySelector('.bookmark-title').textContent.toLowerCase();
+            const desc = bookmark.querySelector('.bookmark-desc')?.textContent.toLowerCase() || '';
             const tags = new Set(bookmark.dataset.tags.split(','));
 
             const matchesTags = selectedTags.size === 0 ||
                 [...selectedTags].every(tag => tags.has(tag));
-            const matchesSearch = title.includes(searchTerm);
+            const matchesSearch = title.includes(searchTerm) || desc.includes(searchTerm);
 
             bookmark.style.display = (matchesTags && matchesSearch) ? '' : 'none';
         });
