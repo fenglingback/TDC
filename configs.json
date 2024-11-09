@@ -4,6 +4,7 @@
         {
             "title": "微博",
             "url": "https://www.weibo.com",
+            "desc": "美女打拳的地方",
             "tags": [
                 "社交",
                 "社区",
@@ -13,6 +14,7 @@
         {
             "title": "抖音",
             "url": "https://www.douyin.com",
+            "desc": "",
             "tags": [
                 "社交",
                 "娱乐"

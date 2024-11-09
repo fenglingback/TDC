@@ -34,6 +34,9 @@
             <a href="{{ bookmark.url }}" class="bookmark" data-tags="{{ bookmark.tags | join(',') }}" target="_blank"
                 rel="noopener noreferrer">
                 <span class="bookmark-title">{{ bookmark.title }}</span>
+                {% if bookmark.desc %}
+                <div class="bookmark-desc">{{ bookmark.desc }}</div>
+                {% endif %}
                 <div class="bookmark-tags">
                     {% for tag in bookmark.tags %}
                     <span>{{ tag }}</span>

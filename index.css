@@ -3,6 +3,8 @@
     --text-color: #e0e0e0;
     --accent-color: #a277ff;
     --secondary-bg: #1d2c53dc;
+    --bm-bg: #912964;
+    --desc-color: #38c3b3;
     scrollbar-width: none;
 }
 
@@ -99,8 +101,11 @@ h1 {
 
 .bookmark:hover {
     transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    background-color: #aa2771;
+    background-color: var(--bm-bg);
+
+    .bookmark-desc {
+        display: block;
+    }
 }
 
 .bookmark-title {
@@ -108,6 +113,15 @@ h1 {
     font-weight: bold;
     margin-bottom: 0.5rem;
     color: var(--accent-color);
+}
+
+.bookmark-desc {
+    font-size: 0.8rem;
+    overflow: hidden;
+    overflow-wrap: break-word;
+    margin-bottom: 0.5rem;
+    color: var(--desc-color);
+    display: none;
 }
 
 .bookmark-tags {
