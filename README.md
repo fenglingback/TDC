@@ -4,7 +4,7 @@
 
 | PC | 移动端 |
 | :---: | :---: |
-| ![TDCpc](https://img.picgo.net/2024/11/11/TDCpc10ae908c385d605f.png) | ![TDCmobile](https://img.picgo.net/2024/11/11/TDCmobilea204c9413afe7330.md.jpg) |
+| ![TDCpc](https://img.picgo.net/2024/11/11/TDCpc10ae908c385d605f.png) | ![TDCmobile](https://img.picgo.net/2024/11/11/TDCmobile47c581fd394c964d.jpg) |
 
 
 ## Deployment
