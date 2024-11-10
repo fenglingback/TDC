@@ -1,5 +1,5 @@
 # 用于将静态内容部署到 GitHub Pages 的简单工作流程
-name: Render by json and Deploy Pages
+name: Render by issues and Deploy Pages
 
 on:
   # 在 issues 上打开或关闭 issue 时触发
