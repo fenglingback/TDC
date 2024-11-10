@@ -1,5 +1,11 @@
-# TDC
-Tags-driven Collector，标签驱动的收集器，浏览器书签的替代品，帮助您摆脱书签与浏览器强绑定的痛苦，并实现真正的多端同步。
+<h1 align="center">TDC</h1>
+
+<p align="center">Tags-driven Collector，标签驱动的收集器，浏览器书签的替代品，帮助您摆脱书签与浏览器强绑定的痛苦，并实现真正的多端同步。</p>
+
+| PC | 移动端 |
+| :---: | :---: |
+| ![TDCpc](https://img.picgo.net/2024/11/11/TDCpc10ae908c385d605f.png) | [![TDCmobile](https://img.picgo.net/2024/11/11/TDCmobilea204c9413afe7330.md.jpg)](https://www.picgo.net/image/TDCmobile.oYDclu) |
+
 
 ## Deployment
 
