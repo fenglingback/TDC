@@ -4,7 +4,7 @@ name: Render by issues and Deploy Pages
 on:
   # 在 issues 上打开或关闭 issue 时触发
   issues:
-    types: [opened, edited, closed]
+    types: [opened, edited, closed, labeled, unlabeled]
 
   # 允许你从 Actions 选项卡手动运行此工作流程
   workflow_dispatch:
