@@ -78,7 +78,6 @@ def get_data_by_issues():
 
 
 
-
 def render(all_tags, bookmarks):
     # 创建模板加载器
     templateLoader = FileSystemLoader(searchpath="./")

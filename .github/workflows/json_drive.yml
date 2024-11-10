@@ -70,5 +70,5 @@ jobs:
           token: ${{ github.token }}
           repository: ${{ github.repository }}
           # 以前的运行与现在比，如果超过了 1 天，就会被删除，但最少会保留 3 个
-          retain_days: 1
+          retain_days: 0
           keep_minimum_runs: 3

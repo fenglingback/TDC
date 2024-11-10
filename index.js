@@ -76,4 +76,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     filterBookmarks();
+    console.log("\n %c TDC %c https://github.com/fenglingback/TDC \n", "color: #fff; background-image: linear-gradient(90deg, rgb(47, 172, 178) 0%, rgb(45, 190, 96) 100%); padding:5px 1px;", "background-image: linear-gradient(90deg, rgb(45, 190, 96) 0%, rgb(255, 255, 255) 100%); padding:5px 0;");
 });
