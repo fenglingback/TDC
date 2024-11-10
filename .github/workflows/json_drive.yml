@@ -57,3 +57,18 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
+  # 删除旧的运行，保留最少3个的运行
+  del_runs:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          # 以前的运行与现在比，如果超过了 1 天，就会被删除，但最少会保留 3 个
+          retain_days: 1
+          keep_minimum_runs: 3
