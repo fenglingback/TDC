@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Issue Creator</title>
+    <style>
+        :root {
+            scrollbar-width: none;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #2f3542;
+            color: #dfe4ea;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #353b48;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #f1f2f6;
+            margin-bottom: 30px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #issuesContainer {
+            margin: 15px 0;
+        }
+
+        .issue-container {
+            border: 1px solid #57606f;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        label {
+            margin-top: 15px;
+            font-weight: bold;
+            display: block;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #57606f;
+            border-radius: 4px;
+            background-color: #2f3542;
+            color: #dfe4ea;
+            box-sizing: border-box;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px;
+            background-color: #5352ed;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #3742fa;
+        }
+
+        #result {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #2f3542;
+            border-radius: 4px;
+        }
+
+        #addIssue {
+            background-color: #2ed573;
+            width: 40px;
+            height: 40px;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            border-radius: 50%;
+        }
+
+        #addIssue:hover {
+            background-color: #26ae60;
+        }
+
+        .labels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .label {
+            background-color: #3498db;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        .delete-issue {
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-issue:hover {
+            background-color: #ff6b81;
+        }
+
+        .issue-labels {
+            margin-top: 15px;
+        }
+
+        .issue-labels label {
+            display: inline-block;
+            margin-right: 15px;
+        }
+
+        #newLabelContainer {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        #newLabel {
+            flex-grow: 1;
+            margin: 0;
+        }
+
+        #addLabel {
+            margin: 0;
+            padding: 10px 15px;
+            white-space: nowrap;
+        }
+
+        button[type="submit"] {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 id="repoTitle">GitHub Issue Creator</h1>
+        <form id="issueForm">
+            <div id="issuesContainer"></div>
+            <button type="button" id="addIssue">+</button>
+            <div id="newLabelContainer">
+                <input type="text" id="newLabel" placeholder="Enter new label name">
+                <button type="button" id="addLabel">Add Label</button>
+            </div>
+            <div class="labels" id="labelsContainer"></div>
+            <button type="submit">Create Issues</button>
+        </form>
+        <div id="result"></div>
+    </div>
+    <script>
+        function getRandomColor() {
+            return Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+        }
+        let owner, repo, token;
+        let labels = [];
+        let issues = [{ title: '', body: '', labels: [] }];
+
+        function promptForInfo() {
+            if (!owner || !repo || !token) {
+                owner = localStorage.getItem('githubOwner') || prompt('Please enter the GitHub username:');
+                repo = localStorage.getItem('githubRepo') || prompt('Please enter the repository name:');
+                token = localStorage.getItem('githubToken') || prompt('Please enter your GitHub Personal Access Token:');
+
+                if (owner && repo && token) {
+                    localStorage.setItem('githubOwner', owner);
+                    localStorage.setItem('githubRepo', repo);
+                    localStorage.setItem('githubToken', token);
+                    document.getElementById('repoTitle').textContent = `GitHub Issue Creator for ${repo}`;
+                    fetchLabels();
+                }
+            }
+        }
+
+        async function fetchLabels() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/labels`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                const data = await response.json();
+                if (Array.isArray(data)) {
+                    labels = data;
+                    updateLabels();
+                } else {
+                    throw new Error('Failed to fetch labels');
+                }
+            } catch (error) {
+                console.error('Error fetching labels:', error);
+                alert('Failed to fetch labels. Please check your token and try again.');
+            }
+        }
+
+        function createIssueInput() {
+            const issueIndex = document.querySelectorAll('.issue-container').length;
+            const container = document.createElement('div');
+            container.className = 'issue-container';
+            container.innerHTML = `
+                <button type="button" class="delete-issue">&times;</button>
+                <label for="title-${issueIndex}">Issue Title:</label>
+                <input type="text" id="title-${issueIndex}" class="title" required>
+                <label for="body-${issueIndex}">Issue Description:</label>
+                <textarea id="body-${issueIndex}" class="body" rows="5" required></textarea>
+                <label>Select Labels:</label>
+                <div class="issue-labels"></div>
+            `;
+            document.getElementById('issuesContainer').appendChild(container);
+
+            container.querySelector('.delete-issue').addEventListener('click', function () {
+                container.remove();
+                issues = issues.filter((_, i) => i !== Array.from(document.querySelectorAll('.issue-container')).indexOf(container));
+            });
+
+            updateLabels();
+        }
+
+        function updateLabels() {
+            const labelsContainer = document.getElementById('labelsContainer');
+            const issueLabelsContainers = document.querySelectorAll('.issue-labels');
+
+            labelsContainer.innerHTML = '';
+            issueLabelsContainers.forEach((container, issueIndex) => {
+                container.innerHTML = '';
+                labels.forEach(label => {
+                    const labelElement = document.createElement('label');
+                    labelElement.innerHTML = `
+                        <input type="checkbox" value="${label.name}" 
+                        ${issues[issueIndex] && issues[issueIndex].labels.includes(label.name) ? 'checked' : ''}>
+                        ${label.name}
+                    `;
+                    container.appendChild(labelElement);
+
+                    labelElement.querySelector('input').addEventListener('change', function () {
+                        if (this.checked) {
+                            issues[issueIndex].labels.push(label.name);
+                        } else {
+                            issues[issueIndex].labels = issues[issueIndex].labels.filter(l => l !== label.name);
+                        }
+                    });
+                });
+            });
+
+            labels.forEach(label => {
+                const labelElement = document.createElement('span');
+                labelElement.className = 'label';
+                labelElement.style.backgroundColor = '#3498db'; // 使用固定的颜色
+                labelElement.textContent = label.name;
+                labelsContainer.appendChild(labelElement);
+            });
+        }
+
+        document.getElementById('addIssue').addEventListener('click', function () {
+            issues.push({ title: '', body: '', labels: [] });
+            createIssueInput();
+        });
+
+        document.getElementById('addLabel').addEventListener('click', async function () {
+            const newLabel = document.getElementById('newLabel').value.trim();
+            if (newLabel && !labels.some(label => label.name === newLabel)) {
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/labels`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            name: newLabel,
+                            color: getRandomColor()
+                        })
+                    });
+                    const data = await response.json();
+                    if (data.name) {
+                        labels.push(data);
+                        updateLabels();
+                        document.getElementById('newLabel').value = '';
+                    } else {
+                        throw new Error('Failed to add label');
+                    }
+                } catch (error) {
+                    console.error('Error adding label:', error);
+                    alert('Failed to add label. Please check your token and try again.');
+                }
+            }
+        });
+
+        document.getElementById('issueForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            promptForInfo();
+            if (!owner || !repo || !token) return;
+
+            const issueContainers = document.querySelectorAll('.issue-container');
+            const url = `https://api.github.com/repos/${owner}/${repo}/issues`;
+
+            issues = Array.from(issueContainers).map((container, index) => ({
+                title: container.querySelector('.title').value,
+                body: container.querySelector('.body').value,
+                labels: issues[index].labels
+            }));
+
+            try {
+                const results = await Promise.all(issues.map(issue =>
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(issue)
+                    }).then(response => response.json())
+                ));
+
+                const successfulIssues = results.filter(data => data.html_url);
+                const failedIssues = results.filter(data => !data.html_url);
+
+                let resultHTML = '';
+                if (successfulIssues.length > 0) {
+                    resultHTML += '<h3>Successfully created issues:</h3>';
+                    resultHTML += successfulIssues.map(data =>
+                        `<p><a href="${data.html_url}" target="_blank">${data.title}</a></p>`
+                    ).join('');
+                }
+                if (failedIssues.length > 0) {
+                    resultHTML += '<h3>Failed to create issues:</h3>';
+                    resultHTML += failedIssues.map(data =>
+                        `<p>Error: ${data.message}</p>`
+                    ).join('');
+                }
+                document.getElementById('result').innerHTML = resultHTML;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `Error: ${error.message}`;
+            }
+        });
+
+        // Initial setup
+        promptForInfo();
+        if (owner && repo && token) {
+            fetchLabels();
+        }
+        createIssueInput();
+    </script>
+</body>
+
+</html>

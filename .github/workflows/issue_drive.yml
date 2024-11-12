@@ -5,6 +5,20 @@ on:
   # 在 issues 上打开、编辑、关闭 issue，以及在 issue 上添加或删除标签时运行
   issues:
     types: [opened, edited, closed, labeled, unlabeled]
+  
+  push:
+    # 在推送到默认分支时运行
+    # branches: ["main"]
+
+    # 在特定文件更改时运行
+    paths:
+      - '*.json'
+      - '*.py'
+      - '*.html'
+      - '*.css'
+      - '*.js'
+      - 'requirements.txt'
+      - '.github/workflows/**'
 
   # 允许你从 Actions 选项卡手动运行此工作流程
   workflow_dispatch:

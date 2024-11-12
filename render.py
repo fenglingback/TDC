@@ -1,24 +1,9 @@
-import json
 import requests
 from jinja2 import Environment, FileSystemLoader
 
 
-def get_data_by_json():
-    with open('bookmarks.json', 'r', encoding='utf-8') as f:
-        data = json.load(f)
 
-    # 获取书签数据
-    bookmarks = data
-    # print(bookmarks)
-
-    # 获取所有标签
-    all_tags = sorted({tag for bookmark in bookmarks for tag in bookmark['tags']})
-    # print(all_tags)
-
-    return all_tags, bookmarks
-
-
-def get_data_by_issues():
+def get_data():
     # 替换为你的 GitHub 用户名和仓库名
     username = 'fenglingback'
     repo_name = 'TDC'
@@ -34,21 +19,22 @@ def get_data_by_issues():
     issues = bm_resp.json()
     bookmarks = []
     for issue in issues:
-        # 获取标题，格式为：书签名 书签链接
-        # 书签名和书签链接之间用空格隔开
-        title = issue['title']
-        # print(f"title: {issue['title']}")
+        # 过滤非自己的 issue
+        if issue['user']['login'] != username:
+            continue
 
         # 获取书签名
-        bookmark_title = title.split(' ')[0]
-        # print(f"bookmark_name: {bookmark_title}")
+        bookmark_title = issue['title']
+        # print(f"bookmark_title: {bookmark_title}")
+
+        body = issue['body']
 
         # 获取书签链接
-        bookmark_url = title.split(' ')[1]
+        bookmark_url = body.split('\n\n')[0]
         # print(f"bookmark_url: {bookmark_url}")
 
         # 获取描述
-        bookmark_desc = issue['body']
+        bookmark_desc = body.split('\n\n')[1]
         # print(f"bookmark_desc: {bookmark_desc}")
 
         # 获取标签
@@ -92,9 +78,8 @@ def render(all_tags, bookmarks):
 
 
 if __name__ == '__main__':
-    
-    render(*get_data_by_json())
-    # get_data_by_json()
 
-    # render(*get_data_by_issues())
+    render(*get_data())
+    # get_data_by_issues()
+
 
