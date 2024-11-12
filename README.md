@@ -26,29 +26,27 @@
 > 适合使用编辑器、会用git、有批量导入需求的用户，但移动端导入不方便
 
 
-书签的增删改都在 `configs.json` 文件中的 `Bookmarks` 字段，具体格式如下：
+书签的增删改都在 `bookmarks.json` 文件中，具体格式如下：
 
 ```json
-{
-    "Bookmarks": [
-        {
-            "title": "Google",
-            "url": "https://www.google.com",
-            "desc": "一个搜索引擎",
-            "tags": [
-                "搜索"
-            ]
-        },
-        {
-            "title": "Github",
-            "url": "https://github.com",
-            "tags": [
-                "code",
-                "资源"
-            ]
-        }
-    ]
-}
+[
+    {
+        "title": "Google",
+        "url": "https://www.google.com",
+        "desc": "一个搜索引擎",
+        "tags": [
+            "搜索"
+        ]
+    },
+    {
+        "title": "Github",
+        "url": "https://github.com",
+        "tags": [
+            "code",
+            "资源"
+        ]
+    }
+]
 ```
 
 `title` 是书签名，`url` 是书签链接，`tags` 是书签的标签。另外，`desc` 是书签的描述，可选。
