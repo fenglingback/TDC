@@ -29,7 +29,7 @@ def get_data():
 
         body = issue['body']
 
-        bookmark_url, bookmark_desc = (body, '') if '\n' or '\r\n' not in body else tuple(body.splitlines())
+        bookmark_url, bookmark_desc = (body, '') if '\n' and '\r\n' not in body else tuple(body.splitlines())
 
         # print(f"bookmark_url: {bookmark_url}")
         # print(f"bookmark_desc: {bookmark_desc}")
@@ -77,6 +77,7 @@ def render(all_tags, bookmarks):
 if __name__ == '__main__':
 
     render(*get_data())
-    # get_data_by_issues()
+    # get_data()
+
 
 
