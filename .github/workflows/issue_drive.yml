@@ -29,14 +29,12 @@ permissions:
   pages: write
   id-token: write
 
-# 只允许一个并发部署，跳过正在进行的运行和最新排队的运行之间的排队运行。
-# 但是，不要取消正在进行的运行，因为我们希望这些生产部署能够完成。
+# 只允许一个并发部署
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  # 由于我们只部署一次，因此只有一个部署作业
   deploy:
     environment:
       name: github-pages
