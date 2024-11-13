@@ -3,8 +3,12 @@ name: Render by issues and Deploy Pages
 
 on:
   # 在 issues 上打开、编辑、关闭、删除 issue，以及在 issue 上添加或删除标签时运行
-  issues:
-    types: [opened, edited, closed, deleted, labeled, unlabeled]
+  # issues:
+  #   types: [opened, edited, closed, deleted, labeled, unlabeled]
+
+  # 星标仓库时运行
+  watch:
+    types: [started]
   
   push:
     # 在推送到默认分支时运行
