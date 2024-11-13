@@ -29,12 +29,9 @@ def get_data():
 
         body = issue['body']
 
-        # 获取书签链接
-        bookmark_url = body.split('\n\n')[0]
-        # print(f"bookmark_url: {bookmark_url}")
+        bookmark_url, bookmark_desc = (body, '') if '\n\n' not in body else body.split('\n\n', 1)
 
-        # 获取描述
-        bookmark_desc = body.split('\n\n')[1]
+        # print(f"bookmark_url: {bookmark_url}")
         # print(f"bookmark_desc: {bookmark_desc}")
 
         # 获取标签
