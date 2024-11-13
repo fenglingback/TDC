@@ -29,10 +29,15 @@ def get_data():
 
         body = issue['body']
 
-        bookmark_url, bookmark_desc = (body, '') if '\n' and '\r\n' not in body else tuple(body.splitlines())
+        if '\n\n' in body:
+            bookmark_url, bookmark_desc = tuple(body.split('\n\n', 1))
+        elif '\r\n\r\n' in body:
+            bookmark_url, bookmark_desc = tuple(body.split('\r\n\r\n', 1))
+        else:
+            bookmark_url, bookmark_desc = (body, '')
 
-        # print(f"bookmark_url: {bookmark_url}")
-        # print(f"bookmark_desc: {bookmark_desc}")
+        print(f"bookmark_url: {bookmark_url}")
+        print(f"bookmark_desc: {bookmark_desc}")
 
         # 获取标签
         tags = [label['name'] for label in issue.get('labels', [])]
