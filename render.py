@@ -27,9 +27,9 @@ def get_data():
         bookmark_title = issue['title']
         # print(f"bookmark_title: {bookmark_title}")
 
-        body = issue['body']
+        body: str = issue['body']
 
-        bookmark_url, bookmark_desc = (body, '') if '\n\n' not in body else body.split('\n\n', 1)
+        bookmark_url, bookmark_desc = (body, '') if '\n\n' or '\r\n\r\n' not in body else tuple(body.splitlines())
 
         # print(f"bookmark_url: {bookmark_url}")
         # print(f"bookmark_desc: {bookmark_desc}")
