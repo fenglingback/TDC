@@ -1,13 +1,13 @@
 import requests
 from jinja2 import Environment, FileSystemLoader
+import os
+
+username = os.environ.get('USERNAME')
+repo_name = os.environ.get('REPO_NAME')
 
 
 
 def get_data():
-    # 替换为你的 GitHub 用户名和仓库名
-    username = 'fenglingback'
-    repo_name = 'TDC'
-
     # 替换为你的 GitHub 访问令牌，可以解除请求限制
     # access_token = 'your_access_token'
 
@@ -36,8 +36,8 @@ def get_data():
         else:
             bookmark_url, bookmark_desc = (body, '')
 
-        print(f"bookmark_url: {bookmark_url}")
-        print(f"bookmark_desc: {bookmark_desc}")
+        # print(f"bookmark_url: {bookmark_url}")
+        # print(f"bookmark_desc: {bookmark_desc}")
 
         # 获取标签
         tags = [label['name'] for label in issue.get('labels', [])]
@@ -58,12 +58,12 @@ def get_data():
     all_tags = [tag['name'] for tag in all_tags_resp.json()]
     # print(all_tags)
 
-    return all_tags, bookmarks
+    return all_tags, bookmarks, username, repo_name
 
 
 
 
-def render(all_tags, bookmarks):
+def render(all_tags, bookmarks, username, repo_name):
     # 创建模板加载器
     templateLoader = FileSystemLoader(searchpath="./")
 
@@ -75,7 +75,7 @@ def render(all_tags, bookmarks):
 
     # 将数据渲染到模板中，并将结果写入目标文件
     with open('index.html', 'w', encoding='utf-8') as f:
-        result = template.render(all_tags=all_tags, bookmarks=bookmarks)
+        result = template.render(all_tags=all_tags, bookmarks=bookmarks, username=username, repo_name=repo_name)
         f.write(result)
 
 

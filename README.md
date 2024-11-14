@@ -20,10 +20,6 @@
 
 ### 通过issues导入书签
 
-> [!IMPORTANT]  
-> 首先需要修改render.py，把 `username = fenglingback` 和 `repo_name = TDC` 中的 `fenglingback` 和 `TDC` 分别替换为你的用户名和仓库名后保存。
-
-
 1. 点击 `Issues`，然后点击 `New issue` 新建一个issue，每个issue就是一个书签
 
 2. 填写 `title`，内容是书签名，例如：`Github`

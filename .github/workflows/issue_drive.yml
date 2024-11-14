@@ -59,6 +59,9 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run Python script
+        env:
+          USERNAME: ${{ github.actor }}
+          REPO_NAME: ${{ github.event.repository.name }}
         run: python render.py  # 执行渲染脚本
         
       - name: Setup Pages
