@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 保存GitHub令牌
+    // 检查并保存GitHub令牌到本地存储
     async function checkAndSaveGitHubToken() {
         const tokenInput = document.getElementById('github-token-input');
         const temp_token = tokenInput.value.trim();
