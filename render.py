@@ -3,7 +3,10 @@ from jinja2 import Environment, FileSystemLoader
 import os
 
 username = os.environ.get('USERNAME')
-repo_name = os.environ.get('REPO_NAME')
+reponame = os.environ.get('REPO_NAME')
+
+# username = 'fenglingback'
+# reponame = 'TDC'
 
 
 
@@ -13,7 +16,7 @@ def get_data():
 
     # headers = {'Authorization': f'token {access_token}'}
 
-    bm_url = f'https://api.github.com/repos/{username}/{repo_name}/issues'
+    bm_url = f'https://api.github.com/repos/{username}/{reponame}/issues'
     bm_params = {'state': 'open'}
     bm_resp = requests.get(bm_url, params=bm_params)
     issues = bm_resp.json()
@@ -53,17 +56,17 @@ def get_data():
 
 
     # 获取所有标签
-    all_tags_url = f'https://api.github.com/repos/{username}/{repo_name}/labels'
+    all_tags_url = f'https://api.github.com/repos/{username}/{reponame}/labels'
     all_tags_resp = requests.get(all_tags_url)
     all_tags = [tag['name'] for tag in all_tags_resp.json()]
     # print(all_tags)
 
-    return all_tags, bookmarks, username, repo_name
+    return all_tags, bookmarks
 
 
 
 
-def render(all_tags, bookmarks, username, repo_name):
+def render(all_tags, bookmarks):
     # 创建模板加载器
     templateLoader = FileSystemLoader(searchpath="./")
 
@@ -75,7 +78,7 @@ def render(all_tags, bookmarks, username, repo_name):
 
     # 将数据渲染到模板中，并将结果写入目标文件
     with open('index.html', 'w', encoding='utf-8') as f:
-        result = template.render(all_tags=all_tags, bookmarks=bookmarks, username=username, repo_name=repo_name)
+        result = template.render(all_tags=all_tags, bookmarks=bookmarks, username=username, reponame=reponame)
         f.write(result)
 
 

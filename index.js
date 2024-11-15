@@ -2,9 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('search-input');
     const tagButtons = document.querySelectorAll('.tag-btn');
     const bookmarks = document.querySelectorAll('.bookmark');
-    const typingTitle = document.getElementById('typing-title');
-    const bm_repo = document.getElementById('bm_repo').textContent;
-    const bm_user = document.getElementById('bm_user').textContent;
+    const bm_repo = document.body.dataset.reponame;
+    const bm_user = document.body.dataset.username;
     const starButton = document.getElementById('star-button');
     const starIcon = starButton.querySelector('.star-icon');
     localStorage.setItem('bm_repo', bm_repo);
@@ -26,20 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 每秒检查一次本地存储的变化
     setInterval(checkStorageAndReload, 1000);
-
-    // 打字效果函数
-    function typeWriter(element, text, i = 0) {
-        if (i < text.length) {
-            element.innerHTML += text.charAt(i);
-            i++;
-            setTimeout(() => typeWriter(element, text, i), 100);
-        }
-    }
-
-    // 启动打字效果
-    const titleText = typingTitle.textContent;
-    typingTitle.textContent = ''; // 清空内容
-    typeWriter(typingTitle, titleText);
 
     function debounce(func, delay) {
         return function () {
@@ -112,14 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     filterBookmarks();
 
-    // 检查GitHub个人访问令牌
-    function checkGitHubToken() {
-        const token = localStorage.getItem('githubToken');
-        if (!token) {
-            showTokenDialog();
-        }
-    }
-
     // 显示令牌输入对话框
     function showTokenDialog() {
         const dialog = document.createElement('div');
@@ -130,6 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p>请输入您的 GitHub 个人访问令牌。这将用于访问 GitHub API。</p>
                 <input type="password" id="github-token-input" placeholder="输入您的 GitHub 令牌">
                 <button id="save-token-btn">保存</button>
+                <button id="cancel-btn">&times;</button>
             </div>
         `;
         document.body.appendChild(dialog);
@@ -138,30 +116,58 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = 'hidden';
 
         const saveButton = document.getElementById('save-token-btn');
-        saveButton.addEventListener('click', saveGitHubToken);
+        const cancelButton = document.getElementById('cancel-btn');
+        saveButton.addEventListener('click', checkAndSaveGitHubToken);
+        cancelButton.addEventListener('click', () => {
+            document.body.removeChild(dialog);
+            // 恢复页面滚动
+            document.body.style.overflow = '';
+        });
     }
 
     // 保存GitHub令牌
-    function saveGitHubToken() {
+    async function checkAndSaveGitHubToken() {
         const tokenInput = document.getElementById('github-token-input');
-        const token = tokenInput.value.trim();
-        if (token) {
-            localStorage.setItem('githubToken', token);
-            document.body.removeChild(document.querySelector('.dialog-overlay').parentNode);
-            // 恢复页面滚动
-            document.body.style.overflow = '';
-        } else {
-            alert('请输入有效的GitHub令牌');
+        const temp_token = tokenInput.value.trim();
+
+        const url = `https://api.github.com/user`
+        const headers = {
+            'Authorization': `token ${temp_token}`,
+            'Accept': 'application/vnd.github.v3+json'
+        };
+
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: headers
+            });
+
+            if (response.status === 200) {
+                const data = await response.json();
+                const username = data.login;
+                if (username === bm_user) {
+                    localStorage.setItem('githubToken', temp_token);
+                    document.body.removeChild(document.querySelector('.dialog-overlay').parentNode);
+                    // 恢复页面滚动
+                    document.body.style.overflow = '';
+                } else {
+                    alert('令牌有效，但不属于该用户！');
+                    tokenInput.value = '';
+                }
+            } else {
+                alert('令牌无效，请检查令牌是否正确');
+                tokenInput.value = '';
+            }
+        } catch (error) {
+            alert('检查网络连接！');
+            console.error('Error:', error);
         }
     }
-
-    // 在页面加载时检查令牌
-    checkGitHubToken();
 
     async function toggleStar() {
         const token = localStorage.getItem('githubToken');
         if (!token) {
-            alert('请先设置 GitHub 个人访问令牌');
+            showTokenDialog();
             return;
         }
 
