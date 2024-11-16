@@ -12,7 +12,7 @@
 
 ### 准备工作
 
-1. 【创建仓库】点击此处👉[通过模板创建仓库](https://github.com/new?template_name=TDC&template_owner=fenglingback)
+1. 【创建仓库】fork本仓库
 
 2. 【启用Pages】在仓库的 `Settings` 中 `Pages->Build and deployment->Source` 下面选择 `Github Actions`。
 
@@ -45,7 +45,11 @@ https://github.com
 
 ### 触发构建书签页面
 
-仓库页面star你的仓库，然后再取消star，这样就会触发action自动构建你的书签页面。
+首次运行需要手动触发：点击 `Actions` -> 左侧 `Render by issues and Deploy Pages` -> 右侧 `Run workflow` 下拉菜单 -> `Run workflow`
+
+然后，你需要获取你的个人令牌，并且令牌需要勾选repo中的权限，在书签页面的左上角点击 `🌟` 填入令牌，会把令牌存放到浏览器本地存储。
+
+此后，你只需点击 `🌟` 即可自动部署
 
 ## 书签页面地址
 
