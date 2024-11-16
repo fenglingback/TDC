@@ -60,9 +60,9 @@ jobs:
 
       - name: Run Python script
         env:
-          USERNAME: ${{ github.actor }}
+          USERNAME: ${{ github.event.repository.owner.login }}
           REPO_NAME: ${{ github.event.repository.name }}
-        run: python render.py  # 执行渲染脚本
+        run: python render.py
         
       - name: Setup Pages
         uses: actions/configure-pages@v5
