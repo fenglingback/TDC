@@ -6,25 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const bm_user = document.body.dataset.username;
     const starButton = document.getElementById('star-button');
     const starIcon = starButton.querySelector('.star-icon');
-    localStorage.setItem('bm_repo', bm_repo);
-    localStorage.setItem('bm_user', bm_user);
 
     let selectedTags = new Set();
     let debounceTimer;
 
-    // 存储初始的本地存储状态
-    const initialStorageState = JSON.stringify(localStorage);
-
-    // 监控本地存储变化并刷新页面
-    function checkStorageAndReload() {
-        const currentStorageState = JSON.stringify(localStorage);
-        if (currentStorageState !== initialStorageState) {
-            window.location.reload();
-        }
-    }
-
-    // 每秒检查一次本地存储的变化
-    setInterval(checkStorageAndReload, 1000);
 
     function debounce(func, delay) {
         return function () {
@@ -128,11 +113,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // 检查并保存GitHub令牌到本地存储
     async function checkAndSaveGitHubToken() {
         const tokenInput = document.getElementById('github-token-input');
-        const temp_token = tokenInput.value.trim();
+        const token = tokenInput.value.trim();
 
         const url = `https://api.github.com/user`
         const headers = {
-            'Authorization': `token ${temp_token}`,
+            'Authorization': `token ${token}`,
             'Accept': 'application/vnd.github.v3+json'
         };
 
@@ -146,12 +131,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
                 const username = data.login;
                 if (username === bm_user) {
-                    localStorage.setItem('githubToken', temp_token);
+                    localStorage.setItem('githubToken', token);
                     document.body.removeChild(document.querySelector('.dialog-overlay').parentNode);
                     // 恢复页面滚动
                     document.body.style.overflow = '';
+                    alert('令牌设置成功！');
                 } else {
-                    alert('令牌有效，但不属于该用户！');
+                    alert('抱歉，你没有权限部署！');
                     tokenInput.value = '';
                 }
             } else {
