@@ -28,11 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const desc = bookmark.querySelector('.bookmark-desc')?.textContent.toLowerCase() || '';
             const tags = new Set(bookmark.dataset.tags.split(','));
 
-            const matchesTags = selectedTags.size === 0 ||
-                [...selectedTags].every(tag => tags.has(tag));
+            const matchesTags = selectedTags.size === 0 || [...selectedTags].every(tag => tags.has(tag));
             const matchesSearch = title.includes(searchTerm) || desc.includes(searchTerm);
 
-            bookmark.style.display = (matchesTags && matchesSearch) ? '' : 'none';
+            bookmark.style.display = matchesTags && matchesSearch ? '' : 'none';
         });
     }
 
@@ -53,36 +52,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     tagButtons.forEach(button => {
-        let touchStartTime;
-        let isTouchMove = false;
-
-        button.addEventListener('touchstart', (e) => {
-            touchStartTime = Date.now();
-            isTouchMove = false;
-        });
-
-        button.addEventListener('touchmove', () => {
-            isTouchMove = true;
-        });
-
-        button.addEventListener('touchend', (e) => {
-            if (!isTouchMove && (Date.now() - touchStartTime) < 200) {
-                e.preventDefault();
-                toggleTag(button);
-            }
-        });
-
-        // 保留点击事件，用于桌面端
-        button.addEventListener('click', (e) => {
-            if (!('ontouchstart' in window)) {
-                toggleTag(button);
-            }
-        });
+        button.addEventListener('touchstart', handleTouchStart);
+        button.addEventListener('touchmove', handleTouchMove);
+        button.addEventListener('touchend', handleTouchEnd);
+        button.addEventListener('click', handleClick);
     });
+
+    function handleTouchStart(e) {
+        e.currentTarget.touchStartTime = Date.now();
+        e.currentTarget.isTouchMove = false;
+    }
+
+    function handleTouchMove(e) {
+        e.currentTarget.isTouchMove = true;
+    }
+
+    function handleTouchEnd(e) {
+        const button = e.currentTarget;
+        if (!button.isTouchMove && (Date.now() - button.touchStartTime) < 200) {
+            e.preventDefault();
+            toggleTag(button);
+        }
+    }
+
+    function handleClick(e) {
+        if (!('ontouchstart' in window)) {
+            toggleTag(e.currentTarget);
+        }
+    }
 
     filterBookmarks();
 
-    // 显示令牌输入对话框
     function showTokenDialog() {
         const dialog = document.createElement('div');
         dialog.innerHTML = `
@@ -96,45 +96,37 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
         document.body.appendChild(dialog);
-
-        // 禁止页面滚动
         document.body.style.overflow = 'hidden';
 
         const saveButton = document.getElementById('save-token-btn');
         const cancelButton = document.getElementById('cancel-btn');
         saveButton.addEventListener('click', checkAndSaveGitHubToken);
-        cancelButton.addEventListener('click', () => {
-            document.body.removeChild(dialog);
-            // 恢复页面滚动
-            document.body.style.overflow = '';
-        });
+        cancelButton.addEventListener('click', closeDialog);
     }
 
-    // 检查并保存GitHub令牌到本地存储
+    function closeDialog() {
+        document.body.removeChild(document.querySelector('.dialog-overlay').parentNode);
+        document.body.style.overflow = '';
+    }
+
     async function checkAndSaveGitHubToken() {
         const tokenInput = document.getElementById('github-token-input');
         const token = tokenInput.value.trim();
 
-        const url = `https://api.github.com/user`
+        const url = `https://api.github.com/user`;
         const headers = {
             'Authorization': `token ${token}`,
             'Accept': 'application/vnd.github.v3+json'
         };
 
         try {
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: headers
-            });
+            const response = await fetch(url, { method: 'GET', headers });
 
             if (response.status === 200) {
                 const data = await response.json();
-                const username = data.login;
-                if (username === bm_user) {
+                if (data.login === bm_user) {
                     localStorage.setItem('githubToken', token);
-                    document.body.removeChild(document.querySelector('.dialog-overlay').parentNode);
-                    // 恢复页面滚动
-                    document.body.style.overflow = '';
+                    closeDialog();
                     alert('令牌设置成功！');
                 } else {
                     alert('抱歉，你没有权限部署！');
@@ -164,22 +156,15 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            const response = await fetch(url, {
-                method: 'PUT',
-                headers: headers
-            });
+            const starResponse = await fetch(url, { method: 'PUT', headers });
 
-            if (response.status === 204) {
+            if (starResponse.status === 204) {
                 starButton.classList.add('starred');
                 starIcon.setAttribute('fill', 'currentColor');
                 console.log('Successfully starred the repository');
 
-                // Wait for 1 second and then unstar
                 setTimeout(async () => {
-                    const unstarResponse = await fetch(url, {
-                        method: 'DELETE',
-                        headers: headers
-                    });
+                    const unstarResponse = await fetch(url, { method: 'DELETE', headers });
 
                     if (unstarResponse.status === 204) {
                         starButton.classList.remove('starred');
