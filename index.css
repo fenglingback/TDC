@@ -17,38 +17,6 @@ body {
     padding: 0;
 }
 
-.star-button {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    background-color: transparent;
-    color: var(--accent-color);
-    width: 30px;
-    height: 30px;
-    border: none;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    z-index: 1000;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.star-button:hover {
-    background-color: var(--bm-bg);
-    transform: scale(1.1);
-}
-
-.star-icon {
-    width: 19px;
-    height: 19px;
-}
-
-.star-button.starred .star-icon {
-    fill: var(--accent-color);
-}
-
 .tool-link {
     position: fixed;
     top: 10px;
@@ -118,7 +86,7 @@ h1 {
     opacity: 0.7;
 }
 
-.tags-container {
+#tags-container {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
@@ -140,7 +108,7 @@ h1 {
     background-color: var(--accent-color);
 }
 
-.bookmarks-container {
+#bookmarks-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 1rem;
@@ -222,7 +190,7 @@ h1 {
     max-width: 400px;
     width: 90%;
     display: grid;
-    gap: 25px;
+    gap: 15px;
 }
 
 .dialog-content * {
@@ -249,28 +217,7 @@ h1 {
     padding: 8px 15px;
     border-radius: 5px;
     cursor: pointer;
-}
-
-#cancel-btn {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background-color: transparent;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 25px;
-    height: 25px;
-    font-size: 18px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.3s ease;
-
-    &:hover {
-        background-color: var(--bm-bg);
-    }
+    margin-top: 10px;
 }
 
 @media (max-width: 768px) {
