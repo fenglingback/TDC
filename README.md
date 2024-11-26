@@ -12,9 +12,12 @@
 
 ### 准备工作
 
-1. 【创建仓库】fork本仓库
+1. 【创建仓库】创建一个 `私密` 仓库
 
-2. 【启用Pages】在仓库的 `Settings` 中 `Pages->Build and deployment->Source` 下面选择 `Github Actions`。
+2. 【创建 Token】创建一个 `Token`：
+
+    [classic token](https://github.com/settings/tokens) -> Generate new token（选classic那个） -> Expiration（选No expiration） -> 勾选 `repo` 项 -> Generate token
+
 
 <hr>
 
@@ -42,15 +45,12 @@ https://github.com
 
 5. 管理标签可以在 `Issues` 页面中点击 `Labels`，可以对标签进行新增、编辑、删除等操作
 
+<hr>
 
-### 触发构建书签页面
+### 获取你的书签页面
 
-首次运行需要手动触发：点击 `Actions` -> 左侧 `Render by issues and Deploy Pages` -> 右侧 `Run workflow` 下拉菜单 -> `Run workflow`
+1. 打开 https://fenglingback.github.io/TDC
 
-然后，你需要获取你的个人令牌，并且令牌需要勾选repo中的权限，在书签页面的左上角点击 `🌟` 填入令牌，会把令牌存放到浏览器本地存储。
+2. 输入你的 `Token` 和 `仓库` 后保存，成功后你的token会被保存到浏览器的本地存储中
 
-此后，你只需点击 `🌟` 即可自动部署
-
-## 书签页面地址
-
-在仓库的 `Settings` 中的 `Pages` 页面有一个 `Visit site` 的按钮，点击它就可以访问你的书签页面了，你也可以把地址保存到本地方便访问。
+3. 等待几秒钟，你的书签页面就生成了
