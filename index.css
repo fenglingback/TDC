@@ -55,6 +55,7 @@ h1 {
     letter-spacing: 0.1em;
     color: var(--accent-color);
     margin-bottom: 2rem;
+    font-size: 1.7em;
 }
 
 .search-container {
