@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('search-input');
-    const limit_labels = 20;
 
     let selectedTags = new Set();
     let debounceTimer;
@@ -18,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function filterBookmarks() {
         const bookmarks = document.querySelectorAll('.bookmark');
         const searchTerm = searchInput.value.toLowerCase();
+        const visibleTags = new Set();
 
         bookmarks.forEach(bookmark => {
             const title = bookmark.querySelector('.bookmark-title').textContent.toLowerCase();
@@ -27,7 +27,30 @@ document.addEventListener('DOMContentLoaded', () => {
             const matchesTags = selectedTags.size === 0 || [...selectedTags].every(tag => tags.has(tag));
             const matchesSearch = title.includes(searchTerm) || desc.includes(searchTerm);
 
-            bookmark.style.display = matchesTags && matchesSearch ? '' : 'none';
+            const isVisible = matchesTags && matchesSearch;
+            bookmark.style.display = isVisible ? '' : 'none';
+
+            if (isVisible) {
+                tags.forEach(tag => visibleTags.add(tag));
+            }
+        });
+
+        updateVisibleTags(visibleTags);
+    }
+
+    function updateVisibleTags(visibleTags) {
+        const tagButtons = document.querySelectorAll('.tag-btn');
+        tagButtons.forEach(button => {
+            const tag = button.dataset.tag;
+            if (visibleTags.has(tag)) {
+                button.style.display = '';
+            } else {
+                button.style.display = 'none';
+                if (selectedTags.has(tag)) {
+                    selectedTags.delete(tag);
+                    button.classList.remove('active');
+                }
+            }
         });
     }
 
@@ -189,38 +212,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 提取标签
     function extractLabels(issues) {
-        const labelCount = new Map();
-        issues.forEach(issue => {
-            issue.labels.forEach(label => {
-                labelCount.set(label, (labelCount.get(label) || 0) + 1);
-            });
-        });
-
-        const sortedLabels = new Map([...labelCount.entries()].sort((a, b) => b[1] - a[1]));
-        // console.log(sortedLabels);
-
-        const labels = Array.from(sortedLabels.keys());
-        if (labels.length <= limit_labels) {
-            return labels;
-        } else {
-            new_labels = [];
-            issues.forEach(issue => {
-                if (issue.labels.length > 0) {
-                    issue.labels.sort((a, b) => sortedLabels.get(b) - sortedLabels.get(a));
-                    // console.log(issue.labels);
-                    for (const label of issue.labels) {
-                        if (new_labels.includes(label)) {
-                            continue;
-                        } else {
-                            new_labels.push(label);
-                            break;
-                        }
-                    }
-                };
-            })
-            new_labels.sort((a, b) => sortedLabels.get(b) - sortedLabels.get(a));
-            return new_labels
+        const labels = new Set();
+        for (const issue of issues) {
+            for (const label of issue.labels) {
+                labels.add(label);
+            }
         }
+        return Array.from(labels);
     }
 
 
