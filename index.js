@@ -3,7 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let selectedTags = new Set();
     let debounceTimer;
-
+    let sortedLabels = null;
+    let tinyPinyin = null;
 
     function debounce(func, delay) {
         return function () {
@@ -211,24 +212,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // 提取标签
-    function extractLabels(issues) {
+    async function extractLabels(issues) {
         const labels = new Set();
         for (const issue of issues) {
             for (const label of issue.labels) {
                 labels.add(label);
             }
         }
-        return Array.from(labels);
+
+        if (!sortedLabels) {
+            if (!tinyPinyin) {
+                tinyPinyin = await import('https://cdn.skypack.dev/tiny-pinyin');
+            }
+            sortedLabels = Array.from(labels).sort((a, b) => {
+                const pinyinA = tinyPinyin.default.parse(a)[0].target.toLowerCase();
+                const pinyinB = tinyPinyin.default.parse(b)[0].target.toLowerCase();
+                return pinyinA.localeCompare(pinyinB);
+            });
+        }
+
+        return sortedLabels;
     }
 
 
     // 渲染页面
     function renderPage(issues_data, labels) {
         const tagsContainer = document.getElementById('tags-container');
+        tagsContainer.innerHTML = ''; // 清空现有的标签
         for (const label of labels) {
             tagsContainer.innerHTML += `<button class="tag-btn" data-tag="${label}">${label}</button>`;
         }
         const bookmarksContainer = document.getElementById('bookmarks-container');
+        bookmarksContainer.innerHTML = ''; // 清空现有的书签
         for (const issue of issues_data) {
             bookmarksContainer.innerHTML += `
                 <a href="${issue.url}" target="_blank" class="bookmark" data-tags="${issue.labels.join(',')}" rel="noopener noreferrer">
@@ -238,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </a>`;
         }
 
-        // Add this line to attach event listeners after rendering
+        // 添加这行来附加事件监听器
         attachTagEventListeners();
     }
 
