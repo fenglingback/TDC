@@ -191,15 +191,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function extractLabels(issues) {
         const labelCount = new Map();
         issues.forEach(issue => {
-            if (issue.labels.length > 0) {
-                issue.labels.forEach(label => {
-                    if (labelCount.has(label)) {
-                        labelCount.set(label, labelCount.get(label) + 1);
-                    } else {
-                        labelCount.set(label, 1);
-                    }
-                });
-            }
+            issue.labels.forEach(label => {
+                labelCount.set(label, (labelCount.get(label) || 0) + 1);
+            });
         });
 
         const sortedLabels = new Map([...labelCount.entries()].sort((a, b) => b[1] - a[1]));
