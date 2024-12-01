@@ -115,13 +115,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 <input type="password" id="github-token-input" placeholder="输入您的 GitHub 令牌">
                 <p>请输入您的 GitHub 书签仓库。</p>
                 <input type="text" id="github-repo-input" placeholder="输入您的 GitHub 书签仓库: e.g. fenglingback/TDC">
-                <button id="save-token-btn">保存</button>
+                <button id="save-btn">保存</button>
             </div>
         `;
         document.body.appendChild(dialog);
         document.body.style.overflow = 'hidden';
 
-        const saveButton = document.getElementById('save-token-btn');
+        const saveButton = document.getElementById('save-btn');
         saveButton.addEventListener('click', checkAndSaveInfo);
     }
 
@@ -287,4 +287,103 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     main();
+
+    const addBookmarkBtn = document.getElementById('add-bookmark-btn');
+
+    addBookmarkBtn.addEventListener('click', () => {
+        if (!localStorage.getItem('githubToken') || !localStorage.getItem('bmRepo')) {
+            showDialog();
+            return;
+        }
+
+        const dialog = document.createElement('div');
+        dialog.innerHTML = `
+            <div class="dialog-overlay"></div>
+            <div class="dialog-content">
+                <h2>添加新书签</h2>
+                <input type="text" id="bookmark-url-input" placeholder="输入网址">
+                <button id="fetch-metadata-btn">获取元数据</button>
+                <input type="text" id="bookmark-title-input" placeholder="标题">
+                <textarea id="bookmark-description-input" placeholder="描述"></textarea>
+                <input type="text" id="bookmark-tags-input" placeholder="标签">
+                <button id="save-bookmark-btn">保存书签</button>
+                <button id="close-dialog-btn">关闭</button>
+            </div>
+        `;
+        document.body.appendChild(dialog);
+        document.body.style.overflow = 'hidden';
+
+        const closeDialogBtn = document.getElementById('close-dialog-btn');
+        const fetchMetadataBtn = document.getElementById('fetch-metadata-btn');
+        const saveBookmarkBtn = document.getElementById('save-bookmark-btn');
+        const urlInput = document.getElementById('bookmark-url-input');
+        const titleInput = document.getElementById('bookmark-title-input');
+        const descriptionInput = document.getElementById('bookmark-description-input');
+        const tagsInput = document.getElementById('bookmark-tags-input');
+
+        closeDialogBtn.addEventListener('click', () => {
+            document.body.removeChild(dialog);
+            document.body.style.overflow = '';
+        });
+
+        fetchMetadataBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch(`https://apis.vercel.app/site?url=${encodeURIComponent(urlInput.value)}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    titleInput.value = data.title || '';
+                    descriptionInput.value = data.description || '';
+                } else {
+                    alert('无法获取元数据。请手动输入信息。');
+                }
+            } catch (error) {
+                console.error('Error fetching metadata:', error);
+                alert('获取元数据时出错。请手动输入信息。');
+            }
+        });
+
+        saveBookmarkBtn.addEventListener('click', async () => {
+            const url = urlInput.value.trim();
+            const title = titleInput.value.trim();
+            const description = descriptionInput.value.trim();
+            const tags = tagsInput.value.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+
+            if (!url || !title) {
+                alert('请至少输入网址和标题。');
+                return;
+            }
+
+            const repo = localStorage.getItem('bmRepo');
+            const token = localStorage.getItem('githubToken');
+
+            try {
+                const response = await fetch(`https://api.github.com/repos/${repo}/issues`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        body: `${url}\n\n${description}`,
+                        labels: tags
+                    })
+                });
+
+                if (response.ok) {
+                    alert('书签已成功保存！');
+                    location.reload();
+                } else {
+                    alert('保存书签时出错。请稍后再试。');
+                }
+            } catch (error) {
+                console.error('Error saving bookmark:', error);
+                alert('保存书签时出错。请检查您的网络连接和 GitHub 令牌。');
+            }
+        });
+
+    });
 });
+
