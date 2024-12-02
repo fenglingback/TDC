@@ -5,6 +5,7 @@
     --secondary-bg: #1d2c53dc;
     --bm-bg: #912964;
     --desc-color: #38c3b3;
+    --chosen-color: #b8548d;
     scrollbar-width: none;
 }
 
@@ -272,7 +273,7 @@ h1 {
 }
 
 #chose-tags-container .tag-btn {
-    background-color: #b8548d;
+    background-color: var(--chosen-color);
     color: var(--text-color);
 }
 
