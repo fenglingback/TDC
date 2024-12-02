@@ -278,8 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const issues = await getAllIssues(repo, headers);
             const labels = await extractLabels(issues);
             renderPage(issues, labels);
-
-            filterBookmarks();
+            document.getElementById('add-bookmark-btn').style.display = 'flex';
         } catch (error) {
             console.error(error);
         }
@@ -296,16 +295,25 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const labels = Array.from(document.querySelectorAll('.tag-btn')).map(tagBtn => tagBtn.dataset.tag);
         const dialog = document.createElement('div');
         dialog.innerHTML = `
             <div class="dialog-overlay"></div>
             <div class="dialog-content">
                 <h2>添加新书签</h2>
-                <input type="text" id="bookmark-url-input" placeholder="输入网址">
-                <button id="fetch-metadata-btn">获取元数据</button>
+                <div class="url-container">
+                    <input type="url" id="bookmark-url-input" placeholder="输入网址">
+                    <button id="fetch-metadata-btn">建议</button>
+                </div>
+                <div id="add-tags-container">
+                    <div id="chose-tags-container"></div>
+                    <input type="text" id="bookmark-tags-input" placeholder="请选择或输入标签">
+                    <div id="tags-list">
+                        ${labels.map(label => `<button class="tag" data-tag="${label}">${label}</button>`).join('')}
+                    </div>
+                </div>
                 <input type="text" id="bookmark-title-input" placeholder="标题">
                 <textarea id="bookmark-description-input" placeholder="描述"></textarea>
-                <input type="text" id="bookmark-tags-input" placeholder="标签">
                 <button id="save-bookmark-btn">保存书签</button>
                 <button id="close-dialog-btn">关闭</button>
             </div>
@@ -319,7 +327,73 @@ document.addEventListener('DOMContentLoaded', () => {
         const urlInput = document.getElementById('bookmark-url-input');
         const titleInput = document.getElementById('bookmark-title-input');
         const descriptionInput = document.getElementById('bookmark-description-input');
+        const choseTagsContainer = document.getElementById('chose-tags-container');
         const tagsInput = document.getElementById('bookmark-tags-input');
+        const tagsList = document.getElementById('tags-list')
+        const tags = document.querySelectorAll('.tag');
+
+        function remove(e) {
+            const tagBtn = e.target;
+            if (!tagBtn.classList.contains('new')) {
+                const tag = tagBtn.dataset.tag;
+                const tagElement = document.querySelector(`.tag[data-tag="${tag}"]`);
+                tagElement.classList.remove('chosen');
+                tagElement.style.display = 'block';
+            }
+
+            choseTagsContainer.removeChild(tagBtn);
+        }
+
+        tags.forEach(tag => {
+            tag.addEventListener('click', () => {
+                tag.classList.toggle('chosen');
+                tag.style.display = 'none';
+                choseTagsContainer.innerHTML += `<button class="tag-btn" data-tag="${tag.dataset.tag}">${tag.dataset.tag}</button>`;
+                const tagBtns = document.querySelectorAll('#chose-tags-container .tag-btn');
+                tagBtns.forEach(tagBtn => {
+                    tagBtn.addEventListener('click', remove);
+                })
+            });
+        });
+
+        tagsInput.addEventListener('focus', () => {
+            tagsInput.style.borderRadius = '5px 5px 0 0';
+            tagsInput.style.borderBottom = 'none';
+            tagsInput.style.outline = 'none';
+            tagsList.style.display = 'block';
+        });
+
+        tagsInput.addEventListener('input', () => {
+            const unchosenTags = Array.from(tags).filter(tag => !tag.classList.contains('chosen'));
+            const inputValue = tagsInput.value.toLowerCase();
+            for (const tag of unchosenTags) {
+                if (tag.textContent.toLowerCase().includes(inputValue)) {
+                    tag.style.display = 'block';
+                } else {
+                    tag.style.display = 'none';
+                }
+            }
+        });
+
+        tagsInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const inputValue = tagsInput.value.trim();
+                if (inputValue !== '') {
+                    const tagBtn = document.createElement('button');
+                    tagBtn.classList.add('tag-btn');
+                    tagBtn.classList.add('new');
+                    tagBtn.textContent = inputValue;
+                    tagBtn.dataset.tag = inputValue;
+                    tagBtn.addEventListener('click', remove);
+                    choseTagsContainer.appendChild(tagBtn);
+                    tagsInput.value = '';
+                    const unchosenTags = Array.from(tags).filter(tag => !tag.classList.contains('chosen'));
+                    for (const tag of unchosenTags) {
+                        tag.style.display = 'block';
+                    }
+                }
+            }
+        });
 
         closeDialogBtn.addEventListener('click', () => {
             document.body.removeChild(dialog);
@@ -347,7 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const url = urlInput.value.trim();
             const title = titleInput.value.trim();
             const description = descriptionInput.value.trim();
-            const tags = tagsInput.value.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+            const tags = Array.from(document.querySelectorAll('#chose-tags-container .tag-btn')).map(tagBtn => tagBtn.dataset.tag);
 
             if (!url || !title) {
                 alert('请至少输入网址和标题。');
@@ -386,4 +460,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
     });
 });
-
