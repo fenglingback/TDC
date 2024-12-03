@@ -332,38 +332,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const tagsList = document.getElementById('tags-list')
         const tags = document.querySelectorAll('.tag');
 
-        function remove(e) {
-            const tagBtn = e.target;
-            if (!tagBtn.classList.contains('new')) {
-                const tag = tagBtn.dataset.tag;
-                const tagElement = document.querySelector(`.tag[data-tag="${tag}"]`);
-                tagElement.classList.remove('chosen');
-                tagElement.style.display = 'block';
-            }
-
-            choseTagsContainer.removeChild(tagBtn);
+        function changeTagsListDisplay(isVisible) {
+            tagsInput.style.borderRadius = isVisible ? '5px 5px 0 0' : '5px';
+            tagsInput.style.borderBottom = isVisible ? 'none' : '';
+            tagsInput.style.outline = isVisible ? 'none' : '';
+            tagsList.style.display = isVisible ? 'block' : 'none';
         }
 
-        tags.forEach(tag => {
-            tag.addEventListener('click', () => {
-                tag.classList.toggle('chosen');
-                tag.style.display = 'none';
-                choseTagsContainer.innerHTML += `<button class="tag-btn" data-tag="${tag.dataset.tag}">${tag.dataset.tag}</button>`;
-                const tagBtns = document.querySelectorAll('#chose-tags-container .tag-btn');
-                tagBtns.forEach(tagBtn => {
-                    tagBtn.addEventListener('click', remove);
-                })
-            });
-        });
+        function checkTagsListDisplay() {
+            if (Array.from(tags).filter(tag => tag.style.display !== 'none').length === 0) {
+                changeTagsListDisplay(false);
+            } else {
+                changeTagsListDisplay(true);
+            }
+        }
 
-        tagsInput.addEventListener('focus', () => {
-            tagsInput.style.borderRadius = '5px 5px 0 0';
-            tagsInput.style.borderBottom = 'none';
-            tagsInput.style.outline = 'none';
-            tagsList.style.display = 'block';
-        });
-
-        tagsInput.addEventListener('input', () => {
+        function filterTags() {
             const unchosenTags = Array.from(tags).filter(tag => !tag.classList.contains('chosen'));
             const inputValue = tagsInput.value.toLowerCase();
             for (const tag of unchosenTags) {
@@ -373,24 +357,56 @@ document.addEventListener('DOMContentLoaded', () => {
                     tag.style.display = 'none';
                 }
             }
+            checkTagsListDisplay();
+        }
+
+        function addSubmitTag(text) {
+            const tagBtn = document.createElement('button');
+            tagBtn.classList.add('tag-btn');
+            tagBtn.textContent = text;
+            tagBtn.dataset.tag = text;
+            tagBtn.addEventListener('click', remove);
+            choseTagsContainer.appendChild(tagBtn);
+            filterTags();
+            return tagBtn;
+        }
+
+        function remove(e) {
+            const tagBtn = e.target;
+            if (!tagBtn.classList.contains('new')) {
+                changeTagsListDisplay(true);
+                const tag = tagBtn.dataset.tag;
+                const tagElement = document.querySelector(`.tag[data-tag="${tag}"]`);
+                tagElement.classList.remove('chosen');
+                tagElement.style.display = 'block';
+            }
+            choseTagsContainer.removeChild(tagBtn);
+        }
+
+        tags.forEach(tag => {
+            tag.addEventListener('click', () => {
+                tag.classList.add('chosen');
+                tag.style.display = 'none';
+                tagsInput.value = '';
+                addSubmitTag(tag.dataset.tag);
+            });
+        });
+
+        tagsInput.addEventListener('focus', () => {
+            checkTagsListDisplay();
+        });
+
+        tagsInput.addEventListener('input', () => {
+            filterTags();
         });
 
         tagsInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 const inputValue = tagsInput.value.trim();
                 if (inputValue !== '') {
-                    const tagBtn = document.createElement('button');
-                    tagBtn.classList.add('tag-btn');
-                    tagBtn.classList.add('new');
-                    tagBtn.textContent = inputValue;
-                    tagBtn.dataset.tag = inputValue;
-                    tagBtn.addEventListener('click', remove);
-                    choseTagsContainer.appendChild(tagBtn);
                     tagsInput.value = '';
-                    const unchosenTags = Array.from(tags).filter(tag => !tag.classList.contains('chosen'));
-                    for (const tag of unchosenTags) {
-                        tag.style.display = 'block';
-                    }
+                    const tagBtn = addSubmitTag(inputValue);
+                    tagBtn.classList.add('new');
                 }
             }
         });
