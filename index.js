@@ -1,55 +1,62 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.getElementById('search-input');
+document.addEventListener("DOMContentLoaded", () => {
+    const searchInput = document.getElementById("search-input");
 
-    let selectedTags = new Set();
+    const selectedTags = new Set();
     let debounceTimer;
-    let sortedLabels = null;
+    const sortedLabels = null;
     let tinyPinyin = null;
 
     function debounce(func, delay) {
         return function () {
-            const context = this;
             const args = arguments;
             clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => func.apply(context, args), delay);
+            debounceTimer = setTimeout(() => func.apply(this, args), delay);
         };
     }
 
     function filterBookmarks() {
-        const bookmarks = document.querySelectorAll('.bookmark');
+        const bookmarks = document.querySelectorAll(".bookmark");
         const searchTerm = searchInput.value.toLowerCase();
         const visibleTags = new Set();
 
-        bookmarks.forEach(bookmark => {
-            const title = bookmark.querySelector('.bookmark-title').textContent.toLowerCase();
-            const desc = bookmark.querySelector('.bookmark-desc')?.textContent.toLowerCase() || '';
-            const tags = new Set(bookmark.dataset.tags.split(','));
+        bookmarks.forEach((bookmark) => {
+            const title = bookmark.querySelector(".bookmark-title").textContent.toLowerCase();
+            const desc = bookmark.querySelector(".bookmark-desc")?.textContent.toLowerCase() || "";
+            const tags = new Set(bookmark.dataset.tags.split(","));
 
-            const matchesTags = selectedTags.size === 0 || [...selectedTags].every(tag => tags.has(tag));
+            const matchesTags = selectedTags.size === 0 || [...selectedTags].every((tag) => tags.has(tag));
             const matchesSearch = title.includes(searchTerm) || desc.includes(searchTerm);
 
             const isVisible = matchesTags && matchesSearch;
-            bookmark.style.display = isVisible ? '' : 'none';
+            bookmark.style.display = isVisible ? "" : "none";
 
             if (isVisible) {
-                tags.forEach(tag => visibleTags.add(tag));
+                tags.forEach((tag) => visibleTags.add(tag));
             }
         });
 
-        updateVisibleTags(visibleTags);
+        const hasActiveFilters = selectedTags.size > 0 || searchTerm.length > 0;
+
+        if (hasActiveFilters) {
+            updateVisibleTags(visibleTags);
+            toggleLettersVisibility(false);
+        } else {
+            showFirstLetterTags();
+            toggleLettersVisibility(true);
+        }
     }
 
     function updateVisibleTags(visibleTags) {
-        const tagButtons = document.querySelectorAll('.tag-btn');
-        tagButtons.forEach(button => {
+        const tagButtons = document.querySelectorAll(".tag-btn");
+        tagButtons.forEach((button) => {
             const tag = button.dataset.tag;
             if (visibleTags.has(tag)) {
-                button.style.display = '';
+                button.style.display = "";
             } else {
-                button.style.display = 'none';
+                button.style.display = "none";
                 if (selectedTags.has(tag)) {
                     selectedTags.delete(tag);
-                    button.classList.remove('active');
+                    button.classList.remove("active");
                 }
             }
         });
@@ -57,28 +64,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const debouncedFilterBookmarks = debounce(filterBookmarks, 500);
 
-    searchInput.addEventListener('input', debouncedFilterBookmarks);
+    searchInput.addEventListener("input", debouncedFilterBookmarks);
 
     function toggleTag(button) {
         const tag = button.dataset.tag;
         if (selectedTags.has(tag)) {
             selectedTags.delete(tag);
-            button.classList.remove('active');
+            button.classList.remove("active");
         } else {
             selectedTags.add(tag);
-            button.classList.add('active');
+            button.classList.add("active");
         }
         filterBookmarks();
     }
 
-    // Move the tag button event listener setup to a separate function
     function attachTagEventListeners() {
-        const tagButtons = document.querySelectorAll('.tag-btn');
-        tagButtons.forEach(button => {
-            button.addEventListener('touchstart', handleTouchStart);
-            button.addEventListener('touchmove', handleTouchMove);
-            button.addEventListener('touchend', handleTouchEnd);
-            button.addEventListener('click', handleClick);
+        const tagButtons = document.querySelectorAll(".tag-btn");
+        tagButtons.forEach((button) => {
+            button.addEventListener("touchstart", handleTouchStart);
+            button.addEventListener("touchmove", handleTouchMove);
+            button.addEventListener("touchend", handleTouchEnd);
+            button.addEventListener("click", handleClick);
         });
     }
 
@@ -93,20 +99,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleTouchEnd(e) {
         const button = e.currentTarget;
-        if (!button.isTouchMove && (Date.now() - button.touchStartTime) < 200) {
+        if (!button.isTouchMove && Date.now() - button.touchStartTime < 200) {
             e.preventDefault();
             toggleTag(button);
         }
     }
 
     function handleClick(e) {
-        if (!('ontouchstart' in window)) {
+        if (!("ontouchstart" in window)) {
             toggleTag(e.currentTarget);
         }
     }
 
+    function toggleLettersVisibility(show) {
+        const lettersContainer = document.getElementById("letters-container");
+        lettersContainer.style.display = show ? "" : "none";
+    }
+
+    let firstLetterTags = [];
+
     function showDialog() {
-        const dialog = document.createElement('div');
+        const dialog = document.createElement("div");
         dialog.innerHTML = `
             <div class="dialog-overlay"></div>
             <div class="dialog-content">
@@ -119,59 +132,57 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
         document.body.appendChild(dialog);
-        document.body.style.overflow = 'hidden';
+        document.body.style.overflow = "hidden";
 
-        const saveButton = document.getElementById('save-btn');
-        saveButton.addEventListener('click', checkAndSaveInfo);
+        const saveButton = document.getElementById("save-btn");
+        saveButton.addEventListener("click", checkAndSaveInfo);
     }
 
     function closeDialog() {
-        document.body.removeChild(document.querySelector('.dialog-overlay').parentNode);
-        document.body.style.overflow = '';
+        document.body.removeChild(document.querySelector(".dialog-overlay").parentNode);
+        document.body.style.overflow = "";
     }
 
     async function checkAndSaveInfo() {
-        const tokenInput = document.getElementById('github-token-input');
-        const repoInput = document.getElementById('github-repo-input');
+        const tokenInput = document.getElementById("github-token-input");
+        const repoInput = document.getElementById("github-repo-input");
         const token = tokenInput.value.trim();
         const repo = repoInput.value.trim();
 
         const url = `https://api.github.com/repos/${repo}`;
         const headers = {
-            'Authorization': `token ${token}`,
-            'Accept': 'application/vnd.github.v3+json'
+            Authorization: `token ${token}`,
+            Accept: "application/vnd.github.v3+json",
         };
 
         try {
-            const response = await fetch(url, { method: 'GET', headers });
+            const response = await fetch(url, { method: "GET", headers });
 
             if (response.ok) {
                 const data = await response.json();
                 if (data.permissions.admin === true) {
-                    localStorage.setItem('githubToken', token);
-                    localStorage.setItem('bmRepo', repo);
+                    localStorage.setItem("githubToken", token);
+                    localStorage.setItem("bmRepo", repo);
                     closeDialog();
                     main();
                 } else {
-                    alert('您不是该仓库的管理员！');
+                    alert("您不是该仓库的管理员！");
                 }
             }
         } catch (error) {
-            alert('检查网络连接和输入信息是否正确！');
-            console.error('Error:', error);
+            alert("检查网络连接和输入信息是否正确！");
+            console.error("Error:", error);
         }
     }
 
-    // 获取所有issues
     async function getAllIssues(repo, headers) {
-
         const issues_url = `https://api.github.com/repos/${repo}/issues`;
 
         let page = 1;
         let issues = [];
         while (true) {
             const response = await fetch(`${issues_url}?page=${page}&per_page=100&state=open`, {
-                headers: headers
+                headers: headers,
             });
 
             if (!response.ok) {
@@ -187,31 +198,27 @@ document.addEventListener('DOMContentLoaded', () => {
             page++;
         }
 
-        const issues_data = issues.map(issue => {
+        const issues_data = issues.map((issue) => {
             let [url, desc] = [];
-            if (issue.body.includes('\n\n')) {
-                [url, desc] = issue.body.split('\n\n');
-            } else if (issue.body.includes('\r\n\r\n')) {
-                [url, desc] = issue.body.split('\r\n\r\n');
+            if (issue.body.includes("\n\n")) {
+                [url, desc] = issue.body.split("\n\n");
+            } else if (issue.body.includes("\r\n\r\n")) {
+                [url, desc] = issue.body.split("\r\n\r\n");
             } else {
-                [url, desc] = [issue.body, '']
+                [url, desc] = [issue.body, ""];
             }
-
 
             return {
                 title: issue.title,
                 url: url,
                 desc: desc,
-                labels: issue.labels.map(label => label.name)
+                labels: issue.labels.map((label) => label.name),
             };
-        })
+        });
 
-        // console.log(issues_data);
         return issues_data;
     }
 
-
-    // 提取标签
     async function extractLabels(issues) {
         const labels = new Set();
         for (const issue of issues) {
@@ -222,81 +229,131 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!sortedLabels) {
             if (!tinyPinyin) {
-                tinyPinyin = await import('https://cdn.skypack.dev/tiny-pinyin');
+                tinyPinyin = await import("https://cdn.skypack.dev/tiny-pinyin");
             }
-            sortedLabels = Array.from(labels).sort((a, b) => {
-                const pinyinA = tinyPinyin.default.parse(a)[0].target.toLowerCase();
-                const pinyinB = tinyPinyin.default.parse(b)[0].target.toLowerCase();
-                return pinyinA.localeCompare(pinyinB);
-            });
-        }
 
-        return sortedLabels;
+            const letterToLabels = {};
+            Array.from(labels).forEach((label) => {
+                const pinyin = tinyPinyin.default.parse(label)[0].target.toUpperCase();
+                const letter = pinyin[0];
+                if (!letterToLabels[letter]) {
+                    letterToLabels[letter] = [];
+                }
+                letterToLabels[letter].push(label);
+            });
+
+            const sortedLetterToLabels = {};
+            for (const letter of "ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
+                if (letterToLabels[letter]) {
+                    sortedLetterToLabels[letter] = letterToLabels[letter].sort();
+                }
+            }
+
+            return sortedLetterToLabels;
+        }
     }
 
+    function showFirstLetterTags() {
+        const tagBtns = document.querySelectorAll(".tag-btn");
+        tagBtns.forEach((btn) => {
+            if (firstLetterTags.includes(btn.dataset.tag)) {
+                btn.style.display = "";
+            } else {
+                btn.style.display = "none";
+            }
+        });
+    }
 
-    // 渲染页面
-    function renderPage(issues_data, labels) {
-        const tagsContainer = document.getElementById('tags-container');
-        tagsContainer.innerHTML = ''; // 清空现有的标签
-        for (const label of labels) {
+    function renderPage(issues_data, sortedLetterToLabels) {
+        const lettersContainer = document.getElementById("letters-container");
+        for (const letter of Object.keys(sortedLetterToLabels)) {
+            lettersContainer.innerHTML += `<div class="letter-item" data-letter="${letter}">${letter}</div>`;
+        }
+
+        const tagsContainer = document.getElementById("tags-container");
+        tagsContainer.innerHTML = ""; // 清空现有的标签
+        for (const label of Object.values(sortedLetterToLabels).flat()) {
             tagsContainer.innerHTML += `<button class="tag-btn" data-tag="${label}">${label}</button>`;
         }
-        const bookmarksContainer = document.getElementById('bookmarks-container');
-        bookmarksContainer.innerHTML = ''; // 清空现有的书签
+        const firstLetter = Object.keys(sortedLetterToLabels)[0];
+        if (firstLetter) {
+            firstLetterTags = sortedLetterToLabels[firstLetter];
+            showFirstLetterTags();
+        }
+        const bookmarksContainer = document.getElementById("bookmarks-container");
+        bookmarksContainer.innerHTML = ""; // 清空现有的书签
         for (const issue of issues_data) {
             bookmarksContainer.innerHTML += `
-                <a href="${issue.url}" target="_blank" class="bookmark" data-tags="${issue.labels.join(',')}" rel="noopener noreferrer">
+                <a href="${issue.url}" target="_blank" class="bookmark" data-tags="${issue.labels.join(",")}" rel="noopener noreferrer">
                     <span class="bookmark-title">${issue.title}</span>
                     <div class="bookmark-desc">${issue.desc}</div>
-                    <div class="bookmark-tags"><span>${issue.labels.join('</span><span>')}</span></div>
+                    <div class="bookmark-tags"><span>${issue.labels.join("</span><span>")}</span></div>
                 </a>`;
         }
 
-        // 添加这行来附加事件监听器
         attachTagEventListeners();
+
+        const letterItems = document.querySelectorAll(".letter-item");
+        letterItems.forEach((item) => {
+            item.addEventListener("click", () => {
+                if (selectedTags.size === 0) {
+                    const letter = item.dataset.letter;
+                    const tags = sortedLetterToLabels[letter] || [];
+                    const tagBtns = document.querySelectorAll(".tag-btn");
+                    tagBtns.forEach((btn) => {
+                        if (tags.includes(btn.dataset.tag)) {
+                            btn.style.display = "";
+                        } else {
+                            btn.style.display = "none";
+                        }
+                    });
+                }
+            });
+        });
+        toggleLettersVisibility(true);
     }
 
-
     async function main() {
-
         try {
-            if (!localStorage.getItem('githubToken') || !localStorage.getItem('bmRepo')) {
+            if (!localStorage.getItem("githubToken") || !localStorage.getItem("bmRepo")) {
                 showDialog();
                 return;
             }
 
-            console.log("\n %c TDC %c https://github.com/fenglingback/TDC \n", "color: #0ca7a4; background-image: linear-gradient(90deg, #555555 0%, #555555 100%); padding:5px 1px;", "color: #a277ff; background-image: linear-gradient(90deg, #555555 0%, #1d294d 100%); padding:5px 0;");
+            console.log(
+                "\n %c TDC %c https://github.com/fenglingback/TDC \n",
+                "color: #0ca7a4; background-image: linear-gradient(90deg, #555555 0%, #555555 100%); padding:5px 1px;",
+                "color: #a277ff; background-image: linear-gradient(90deg, #555555 0%, #1d294d 100%); padding:5px 0;",
+            );
 
-            const repo = localStorage.getItem('bmRepo');
-            const token = localStorage.getItem('githubToken');
+            const repo = localStorage.getItem("bmRepo");
+            const token = localStorage.getItem("githubToken");
             const headers = {
-                'Authorization': `token ${token}`,
-                'Accept': 'application/vnd.github.v3+json'
+                Authorization: `token ${token}`,
+                Accept: "application/vnd.github.v3+json",
             };
 
             const issues = await getAllIssues(repo, headers);
             const labels = await extractLabels(issues);
             renderPage(issues, labels);
-            document.getElementById('add-bookmark-btn').style.display = 'flex';
+            document.getElementById("add-bookmark-btn").style.display = "flex";
         } catch (error) {
             console.error(error);
         }
-
     }
 
     main();
 
-    const addBookmarkBtn = document.getElementById('add-bookmark-btn');
+    const addBookmarkBtn = document.getElementById("add-bookmark-btn");
 
-    addBookmarkBtn.addEventListener('click', () => {
-        if (!localStorage.getItem('githubToken') || !localStorage.getItem('bmRepo')) {
+    addBookmarkBtn.addEventListener("click", () => {
+        if (!localStorage.getItem("githubToken") || !localStorage.getItem("bmRepo")) {
             showDialog();
             return;
         }
 
-        const labels = Array.from(document.querySelectorAll('.tag-btn')).map(tagBtn => tagBtn.dataset.tag);
-        const dialog = document.createElement('div');
+        const labels = Array.from(document.querySelectorAll(".tag-btn")).map((tagBtn) => tagBtn.dataset.tag);
+        const dialog = document.createElement("div");
         dialog.innerHTML = `
             <div class="dialog-overlay"></div>
             <div class="dialog-content">
@@ -309,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div id="chose-tags-container"></div>
                     <input type="text" id="bookmark-tags-input" placeholder="请选择或输入标签">
                     <div id="tags-list">
-                        ${labels.map(label => `<button class="tag" data-tag="${label}">${label}</button>`).join('')}
+                        ${labels.map((label) => `<button class="tag" data-tag="${label}">${label}</button>`).join("")}
                     </div>
                 </div>
                 <input type="text" id="bookmark-title-input" placeholder="标题">
@@ -319,28 +376,28 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
         document.body.appendChild(dialog);
-        document.body.style.overflow = 'hidden';
+        document.body.style.overflow = "hidden";
 
-        const closeDialogBtn = document.getElementById('close-dialog-btn');
-        const fetchMetadataBtn = document.getElementById('fetch-metadata-btn');
-        const saveBookmarkBtn = document.getElementById('save-bookmark-btn');
-        const urlInput = document.getElementById('bookmark-url-input');
-        const titleInput = document.getElementById('bookmark-title-input');
-        const descriptionInput = document.getElementById('bookmark-description-input');
-        const choseTagsContainer = document.getElementById('chose-tags-container');
-        const tagsInput = document.getElementById('bookmark-tags-input');
-        const tagsList = document.getElementById('tags-list')
-        const tags = document.querySelectorAll('.tag');
+        const closeDialogBtn = document.getElementById("close-dialog-btn");
+        const fetchMetadataBtn = document.getElementById("fetch-metadata-btn");
+        const saveBookmarkBtn = document.getElementById("save-bookmark-btn");
+        const urlInput = document.getElementById("bookmark-url-input");
+        const titleInput = document.getElementById("bookmark-title-input");
+        const descriptionInput = document.getElementById("bookmark-description-input");
+        const choseTagsContainer = document.getElementById("chose-tags-container");
+        const tagsInput = document.getElementById("bookmark-tags-input");
+        const tagsList = document.getElementById("tags-list");
+        const tags = document.querySelectorAll(".tag");
 
         function changeTagsListDisplay(isVisible) {
-            tagsInput.style.borderRadius = isVisible ? '5px 5px 0 0' : '5px';
-            tagsInput.style.borderBottom = isVisible ? 'none' : '';
-            tagsInput.style.outline = isVisible ? 'none' : '';
-            tagsList.style.display = isVisible ? 'block' : 'none';
+            tagsInput.style.borderRadius = isVisible ? "5px 5px 0 0" : "5px";
+            tagsInput.style.borderBottom = isVisible ? "none" : "";
+            tagsInput.style.outline = isVisible ? "none" : "";
+            tagsList.style.display = isVisible ? "block" : "none";
         }
 
         function checkTagsListDisplay() {
-            if (Array.from(tags).filter(tag => tag.style.display !== 'none').length === 0) {
+            if (Array.from(tags).filter((tag) => tag.style.display !== "none").length === 0) {
                 changeTagsListDisplay(false);
             } else {
                 changeTagsListDisplay(true);
@@ -348,24 +405,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function filterTags() {
-            const unchosenTags = Array.from(tags).filter(tag => !tag.classList.contains('chosen'));
+            const unchosenTags = Array.from(tags).filter((tag) => !tag.classList.contains("chosen"));
             const inputValue = tagsInput.value.toLowerCase();
             for (const tag of unchosenTags) {
                 if (tag.textContent.toLowerCase().includes(inputValue)) {
-                    tag.style.display = 'block';
+                    tag.style.display = "block";
                 } else {
-                    tag.style.display = 'none';
+                    tag.style.display = "none";
                 }
             }
             checkTagsListDisplay();
         }
 
         function addSubmitTag(text) {
-            const tagBtn = document.createElement('button');
-            tagBtn.classList.add('tag-btn');
+            const tagBtn = document.createElement("button");
+            tagBtn.classList.add("tag-btn");
             tagBtn.textContent = text;
             tagBtn.dataset.tag = text;
-            tagBtn.addEventListener('click', remove);
+            tagBtn.addEventListener("click", remove);
             choseTagsContainer.appendChild(tagBtn);
             filterTags();
             return tagBtn;
@@ -373,106 +430,107 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function remove(e) {
             const tagBtn = e.target;
-            if (!tagBtn.classList.contains('new')) {
+            if (!tagBtn.classList.contains("new")) {
                 changeTagsListDisplay(true);
                 const tag = tagBtn.dataset.tag;
                 const tagElement = document.querySelector(`.tag[data-tag="${tag}"]`);
-                tagElement.classList.remove('chosen');
-                tagElement.style.display = 'block';
+                tagElement.classList.remove("chosen");
+                tagElement.style.display = "block";
             }
             choseTagsContainer.removeChild(tagBtn);
         }
 
-        tags.forEach(tag => {
-            tag.addEventListener('click', () => {
-                tag.classList.add('chosen');
-                tag.style.display = 'none';
-                tagsInput.value = '';
+        tags.forEach((tag) => {
+            tag.addEventListener("click", () => {
+                tag.classList.add("chosen");
+                tag.style.display = "none";
+                tagsInput.value = "";
                 addSubmitTag(tag.dataset.tag);
             });
         });
 
-        tagsInput.addEventListener('focus', () => {
+        tagsInput.addEventListener("focus", () => {
             checkTagsListDisplay();
         });
 
-        tagsInput.addEventListener('input', () => {
+        tagsInput.addEventListener("input", () => {
             filterTags();
         });
 
-        tagsInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
+        tagsInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
                 const inputValue = tagsInput.value.trim();
-                if (inputValue !== '') {
-                    tagsInput.value = '';
+                if (inputValue !== "") {
+                    tagsInput.value = "";
                     const tagBtn = addSubmitTag(inputValue);
-                    tagBtn.classList.add('new');
+                    tagBtn.classList.add("new");
                 }
             }
         });
 
-        closeDialogBtn.addEventListener('click', () => {
+        closeDialogBtn.addEventListener("click", () => {
             document.body.removeChild(dialog);
-            document.body.style.overflow = '';
+            document.body.style.overflow = "";
         });
 
-        fetchMetadataBtn.addEventListener('click', async () => {
+        fetchMetadataBtn.addEventListener("click", async () => {
             try {
                 const response = await fetch(`https://apis.vercel.app/site?url=${encodeURIComponent(urlInput.value)}`);
                 const data = await response.json();
 
                 if (response.ok) {
-                    titleInput.value = data.title || '';
-                    descriptionInput.value = data.description || '';
+                    titleInput.value = data.title || "";
+                    descriptionInput.value = data.description || "";
                 } else {
-                    alert('无法获取元数据。请手动输入信息。');
+                    alert("无法获取元数据。请手动输入信息。");
                 }
             } catch (error) {
-                console.error('Error fetching metadata:', error);
-                alert('获取元数据时出错。请手动输入信息。');
+                console.error("Error fetching metadata:", error);
+                alert("获取元数据时出错。请手动输入信息。");
             }
         });
 
-        saveBookmarkBtn.addEventListener('click', async () => {
+        saveBookmarkBtn.addEventListener("click", async () => {
             const url = urlInput.value.trim();
             const title = titleInput.value.trim();
             const description = descriptionInput.value.trim();
-            const tags = Array.from(document.querySelectorAll('#chose-tags-container .tag-btn')).map(tagBtn => tagBtn.dataset.tag);
+            const tags = Array.from(document.querySelectorAll("#chose-tags-container .tag-btn")).map(
+                (tagBtn) => tagBtn.dataset.tag,
+            );
 
             if (!url || !title) {
-                alert('请至少输入网址和标题。');
+                alert("请至少输入网址和标题。");
                 return;
             }
 
-            const repo = localStorage.getItem('bmRepo');
-            const token = localStorage.getItem('githubToken');
+            const repo = localStorage.getItem("bmRepo");
+            const token = localStorage.getItem("githubToken");
 
             try {
                 const response = await fetch(`https://api.github.com/repos/${repo}/issues`, {
-                    method: 'POST',
+                    method: "POST",
                     headers: {
-                        'Authorization': `token ${token}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
+                        Authorization: `token ${token}`,
+                        Accept: "application/vnd.github.v3+json",
+                        "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
                         title: title,
                         body: `${url}\n\n${description}`,
-                        labels: tags
-                    })
+                        labels: tags,
+                    }),
                 });
 
                 if (response.ok) {
-                    alert('书签已成功保存！');
+                    alert("书签已成功保存！");
                     location.reload();
                 } else {
-                    alert('保存书签时出错。请稍后再试。');
+                    alert("保存书签时出错。请稍后再试。");
                 }
             } catch (error) {
-                console.error('Error saving bookmark:', error);
-                alert('保存书签时出错。请检查您的网络连接和 GitHub 令牌。');
+                console.error("Error saving bookmark:", error);
+                alert("保存书签时出错。请检查您的网络连接和 GitHub 令牌。");
             }
         });
-
     });
 });
