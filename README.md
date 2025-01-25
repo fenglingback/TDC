@@ -54,3 +54,8 @@ https://github.com
 2. 输入你的 `Token` 和 `仓库` 后保存，成功后你的token会被保存到浏览器的本地存储中
 
 3. 等待几秒钟，你的书签页面就生成了
+
+
+## 致谢
+
+- [tiny-pinyin](https://github.com/creeperyang/pinyin)，一款超轻量级的汉字转拼音库
