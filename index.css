@@ -77,10 +77,10 @@ h1 {
     transition: all 0.3s ease;
 }
 
-.letter-item:hover {
+/* .letter-item:hover {
     background-color: var(--accent-color);
     color: var(--bg-color);
-}
+} */
 
 .letter-item.active {
     background-color: var(--accent-color);
