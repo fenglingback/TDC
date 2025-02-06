@@ -41,21 +41,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (hasActiveFilters) {
             updateVisibleTags(visibleTags)
             toggleLettersVisibility(false)
-            // 重置字母的选中状态
+            // Reset all letter items
             document.querySelectorAll(".letter-item").forEach((item) => item.classList.remove("active"))
         } else {
             showFirstLetterTags()
             toggleLettersVisibility(true)
-
-            // 重置所有字母的选中状态，并设置第一个字母为选中状态
-            const letterItems = document.querySelectorAll(".letter-item")
-            letterItems.forEach((item, index) => {
-                if (index === 0) {
-                    item.classList.add("active")
-                } else {
-                    item.classList.remove("active")
-                }
-            })
+            // Set the first letter as active
+            const firstLetterItem = document.querySelector(".letter-item")
+            if (firstLetterItem) {
+                firstLetterItem.classList.add("active")
+            }
         }
     }
 
@@ -88,15 +83,22 @@ document.addEventListener("DOMContentLoaded", () => {
             selectedTags.add(tag)
             button.classList.add("active")
         }
+
+        // Clear the search input
+        searchInput.value = ""
+
         filterBookmarks()
 
-        // If no tags are selected, show the letters container
-        if (selectedTags.size === 0 && searchInput.value.length === 0) {
+        // If no tags are selected, show the letters container and set the first letter as active
+        if (selectedTags.size === 0) {
             toggleLettersVisibility(true)
-            // Set the first letter as active
             const firstLetterItem = document.querySelector(".letter-item")
             if (firstLetterItem) {
+                document.querySelectorAll(".letter-item").forEach((item) => item.classList.remove("active"))
                 firstLetterItem.classList.add("active")
+                // Show tags for the first letter
+                const firstLetter = firstLetterItem.dataset.letter
+                showTagsForLetter(firstLetter)
             }
         } else {
             toggleLettersVisibility(false)
@@ -107,34 +109,14 @@ document.addEventListener("DOMContentLoaded", () => {
     function attachTagEventListeners() {
         const tagButtons = document.querySelectorAll(".tag-btn")
         tagButtons.forEach((button) => {
-            button.addEventListener("touchstart", handleTouchStart)
-            button.addEventListener("touchmove", handleTouchMove)
-            button.addEventListener("touchend", handleTouchEnd)
-            button.addEventListener("click", handleClick)
+            const handleTagSelection = (e) => {
+                e.preventDefault()
+                toggleTag(button)
+            }
+
+            button.addEventListener("click", handleTagSelection)
+            button.addEventListener("touchstart", handleTagSelection)
         })
-    }
-
-    function handleTouchStart(e) {
-        e.currentTarget.touchStartTime = Date.now()
-        e.currentTarget.isTouchMove = false
-    }
-
-    function handleTouchMove(e) {
-        e.currentTarget.isTouchMove = true
-    }
-
-    function handleTouchEnd(e) {
-        const button = e.currentTarget
-        if (!button.isTouchMove && Date.now() - button.touchStartTime < 200) {
-            e.preventDefault()
-            toggleTag(button)
-        }
-    }
-
-    function handleClick(e) {
-        if (!("ontouchstart" in window)) {
-            toggleTag(e.currentTarget)
-        }
     }
 
     function toggleLettersVisibility(show) {
@@ -297,6 +279,19 @@ document.addEventListener("DOMContentLoaded", () => {
         })
     }
 
+    // Add this new function to show tags for a specific letter
+    function showTagsForLetter(letter) {
+        const tags = sortedLetterToLabels[letter] || []
+        const tagBtns = document.querySelectorAll(".tag-btn")
+        tagBtns.forEach((btn) => {
+            if (tags.includes(btn.dataset.tag)) {
+                btn.style.display = ""
+            } else {
+                btn.style.display = "none"
+            }
+        })
+    }
+
     // 渲染页面
     function renderPage(issues_data, sortedLetterToLabels) {
         const lettersContainer = document.getElementById("letters-container")
@@ -338,7 +333,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // 给字母附加事件监听器
         const letterItems = document.querySelectorAll(".letter-item")
         letterItems.forEach((item) => {
-            item.addEventListener("click", () => {
+            const handleLetterSelection = (e) => {
+                e.preventDefault()
                 if (selectedTags.size === 0 && searchInput.value.length === 0) {
                     const letter = item.dataset.letter
                     const tags = sortedLetterToLabels[letter] || []
@@ -355,9 +351,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     letterItems.forEach((letterItem) => letterItem.classList.remove("active"))
                     item.classList.add("active")
                 }
-            })
+            }
+
+            item.addEventListener("click", handleLetterSelection)
+            item.addEventListener("touchstart", handleLetterSelection)
         })
-        toggleLettersVisibility(true)
     }
 
     async function main() {
