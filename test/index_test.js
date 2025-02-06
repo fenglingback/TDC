@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let debounceTimer
     const sortedLabels = null
     let tinyPinyin = null
+    let firstLetterTags = []
 
     function debounce(func, delay) {
         return function () {
@@ -40,9 +41,21 @@ document.addEventListener("DOMContentLoaded", () => {
         if (hasActiveFilters) {
             updateVisibleTags(visibleTags)
             toggleLettersVisibility(false)
+            // 重置字母的选中状态
+            document.querySelectorAll(".letter-item").forEach((item) => item.classList.remove("active"))
         } else {
             showFirstLetterTags()
             toggleLettersVisibility(true)
+
+            // 重置所有字母的选中状态，并设置第一个字母为选中状态
+            const letterItems = document.querySelectorAll(".letter-item")
+            letterItems.forEach((item, index) => {
+                if (index === 0) {
+                    item.classList.add("active")
+                } else {
+                    item.classList.remove("active")
+                }
+            })
         }
     }
 
@@ -76,6 +89,18 @@ document.addEventListener("DOMContentLoaded", () => {
             button.classList.add("active")
         }
         filterBookmarks()
+
+        // If no tags are selected, show the letters container
+        if (selectedTags.size === 0 && searchInput.value.length === 0) {
+            toggleLettersVisibility(true)
+            // Set the first letter as active
+            const firstLetterItem = document.querySelector(".letter-item")
+            if (firstLetterItem) {
+                firstLetterItem.classList.add("active")
+            }
+        } else {
+            toggleLettersVisibility(false)
+        }
     }
 
     // Move the tag button event listener setup to a separate function
@@ -116,8 +141,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const lettersContainer = document.getElementById("letters-container")
         lettersContainer.style.display = show ? "" : "none"
     }
-
-    let firstLetterTags = []
 
     function showDialog() {
         const dialog = document.createElement("div")
@@ -291,6 +314,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (firstLetter) {
             firstLetterTags = sortedLetterToLabels[firstLetter]
             showFirstLetterTags()
+
+            // 设置第一个字母为选中状态
+            const firstLetterItem = document.querySelector(`.letter-item[data-letter="${firstLetter}"]`)
+            if (firstLetterItem) {
+                firstLetterItem.classList.add("active")
+            }
         }
         const bookmarksContainer = document.getElementById("bookmarks-container")
         bookmarksContainer.innerHTML = "" // 清空现有的书签
@@ -310,7 +339,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const letterItems = document.querySelectorAll(".letter-item")
         letterItems.forEach((item) => {
             item.addEventListener("click", () => {
-                if (selectedTags.size === 0) {
+                if (selectedTags.size === 0 && searchInput.value.length === 0) {
                     const letter = item.dataset.letter
                     const tags = sortedLetterToLabels[letter] || []
                     const tagBtns = document.querySelectorAll(".tag-btn")
@@ -321,6 +350,10 @@ document.addEventListener("DOMContentLoaded", () => {
                             btn.style.display = "none"
                         }
                     })
+
+                    // 更新选中字母的样式
+                    letterItems.forEach((letterItem) => letterItem.classList.remove("active"))
+                    item.classList.add("active")
                 }
             })
         })

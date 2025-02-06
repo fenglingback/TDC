@@ -89,6 +89,18 @@ document.addEventListener("DOMContentLoaded", () => {
             button.classList.add("active")
         }
         filterBookmarks()
+
+        // If no tags are selected, show the letters container
+        if (selectedTags.size === 0 && searchInput.value.length === 0) {
+            toggleLettersVisibility(true)
+            // Set the first letter as active
+            const firstLetterItem = document.querySelector(".letter-item")
+            if (firstLetterItem) {
+                firstLetterItem.classList.add("active")
+            }
+        } else {
+            toggleLettersVisibility(false)
+        }
     }
 
     // Move the tag button event listener setup to a separate function

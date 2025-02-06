@@ -61,26 +61,48 @@ h1 {
     opacity: 0.7;
 }
 
+/* Other CSS styles */
 #letters-container {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 0.5rem 0;
     margin-bottom: 2rem;
+    flex-wrap: wrap;
 }
 
-#letters-container :first-child {
-    border-left: 1px solid gray;
-    border-right: 1px solid gray;
-    cursor: pointer;
-}
-
-#letters-container :not(:first-child) {
-    border-right: 1px solid gray;
-    cursor: pointer;
+#letters-container::-webkit-scrollbar {
+    display: none;
 }
 
 .letter-item {
-    padding: 0 1rem;
+    flex: 0 0 auto;
+    padding: 0.5rem 0.75rem;
+    margin: 0 0.25rem;
+    cursor: pointer;
+    border: 1px solid var(--accent-color);
+    border-radius: 4px;
+    transition: all 0.3s ease;
 }
+
+.letter-item:hover {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+}
+
+.letter-item.active {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+    font-weight: bold;
+    transform: scale(1.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Rest of CSS styles */
 
 #tags-container {
     display: flex;
