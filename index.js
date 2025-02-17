@@ -1,11 +1,23 @@
 document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.getElementById("search-input")
+    // 判断设备类型
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    console.log("是否为移动设备：", isMobile)
 
     const selectedTags = new Set()
     let debounceTimer
-    const sortedLabels = null
-    let tinyPinyin = null
-    let firstLetterTags = []
+    let tinyPinyin
+    const sortedLetterToLabels = {}
+    let activeLetter
+
+    // 处理不同设备的点击事件
+    function handleClick(button, func) {
+        if (isMobile) {
+            button.addEventListener("touchend", func)
+        } else {
+            button.addEventListener("click", func)
+        }
+    }
 
     function debounce(func, delay) {
         return function () {
@@ -36,21 +48,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         })
 
+        // 每次过滤后更新字母导航栏
         const hasActiveFilters = selectedTags.size > 0 || searchTerm.length > 0
-
         if (hasActiveFilters) {
             updateVisibleTags(visibleTags)
             toggleLettersVisibility(false)
-            // Reset all letter items
-            document.querySelectorAll(".letter-item").forEach((item) => item.classList.remove("active"))
         } else {
-            showFirstLetterTags()
+            showTagsForLetter(activeLetter)
             toggleLettersVisibility(true)
-            // Set the first letter as active
-            const firstLetterItem = document.querySelector(".letter-item")
-            if (firstLetterItem) {
-                firstLetterItem.classList.add("active")
-            }
         }
     }
 
@@ -74,51 +79,62 @@ document.addEventListener("DOMContentLoaded", () => {
 
     searchInput.addEventListener("input", debouncedFilterBookmarks)
 
-    function toggleTag(button) {
-        const tag = button.dataset.tag
-        if (selectedTags.has(tag)) {
-            selectedTags.delete(tag)
-            button.classList.remove("active")
-        } else {
-            selectedTags.add(tag)
-            button.classList.add("active")
-        }
-
-        // Clear the search input
-        searchInput.value = ""
-
-        filterBookmarks()
-
-        // If no tags are selected, show the letters container and set the first letter as active
-        if (selectedTags.size === 0) {
-            toggleLettersVisibility(true)
-            const firstLetterItem = document.querySelector(".letter-item")
-            if (firstLetterItem) {
-                document.querySelectorAll(".letter-item").forEach((item) => item.classList.remove("active"))
-                firstLetterItem.classList.add("active")
-                // Show tags for the first letter
-                const firstLetter = firstLetterItem.dataset.letter
-                showTagsForLetter(firstLetter)
-            }
-        } else {
-            toggleLettersVisibility(false)
-        }
-    }
-
-    // Move the tag button event listener setup to a separate function
+    // 将标签按钮事件侦听器设置移至单独的功能
     function attachTagEventListeners() {
         const tagButtons = document.querySelectorAll(".tag-btn")
         tagButtons.forEach((button) => {
             const handleTagSelection = (e) => {
                 e.preventDefault()
-                toggleTag(button)
+                const tag = button.dataset.tag
+                if (selectedTags.has(tag)) {
+                    selectedTags.delete(tag)
+                    button.classList.remove("active")
+                } else {
+                    selectedTags.add(tag)
+                    button.classList.add("active")
+                }
+
+                // 清空搜索框
+                searchInput.value = ""
+
+                filterBookmarks()
             }
 
-            button.addEventListener("click", handleTagSelection)
-            button.addEventListener("touchstart", handleTagSelection)
+            handleClick(button, handleTagSelection)
         })
     }
 
+
+    // 将字母按钮事件侦听器设置移至单独的功能
+    function attachLetterEventListeners() {
+        const letterItems = document.querySelectorAll(".letter-item")
+        letterItems.forEach((item) => {
+            const handleLetterSelection = (e) => {
+                e.preventDefault()
+                if (selectedTags.size === 0 && searchInput.value.length === 0) {
+                    const letter = item.dataset.letter
+                    const tags = sortedLetterToLabels[letter]
+                    const tagBtns = document.querySelectorAll(".tag-btn")
+                    tagBtns.forEach((btn) => {
+                        if (tags.includes(btn.dataset.tag)) {
+                            btn.style.display = ""
+                        } else {
+                            btn.style.display = "none"
+                        }
+                    })
+
+                    // 更新选中字母的样式
+                    letterItems.forEach((letterItem) => letterItem.classList.remove("active"))
+                    item.classList.add("active")
+                    activeLetter = item.dataset.letter
+                }
+            }
+
+            handleClick(item, handleLetterSelection)
+        })
+    }
+
+    // 控制字母按钮的可见性
     function toggleLettersVisibility(show) {
         const lettersContainer = document.getElementById("letters-container")
         lettersContainer.style.display = show ? "" : "none"
@@ -208,11 +224,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const issues_data = issues.map((issue) => {
             let [url, desc] = []
             if (issue.body.includes("\n\n")) {
-                ;[url, desc] = issue.body.split("\n\n")
+                [url, desc] = issue.body.split("\n\n")
             } else if (issue.body.includes("\r\n\r\n")) {
-                ;[url, desc] = issue.body.split("\r\n\r\n")
+                [url, desc] = issue.body.split("\r\n\r\n")
             } else {
-                ;[url, desc] = [issue.body, ""]
+                [url, desc] = [issue.body, ""]
             }
 
             return {
@@ -223,7 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         })
 
-        // console.log(issues_data);
+        // console.log(issues_data)
         return issues_data
     }
 
@@ -236,50 +252,34 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        if (!sortedLabels) {
-            if (!tinyPinyin) {
-                tinyPinyin = await import("https://cdn.skypack.dev/tiny-pinyin")
-            }
-
-            // 构造一个字母到标签的映射
-            const letterToLabels = {}
-            Array.from(labels).forEach((label) => {
-                const pinyin = tinyPinyin.default.parse(label)[0].target.toUpperCase()
-                const letter = pinyin[0]
-                if (!letterToLabels[letter]) {
-                    letterToLabels[letter] = []
-                }
-                letterToLabels[letter].push(label)
-            })
-
-            // console.log(letterToLabels);
-
-            // 按字母顺序重新排列这个映射
-            const sortedLetterToLabels = {}
-            for (const letter of "ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
-                if (letterToLabels[letter]) {
-                    sortedLetterToLabels[letter] = letterToLabels[letter].sort()
-                }
-            }
-
-            // console.log(sortedLetterToLabels);
-
-            return sortedLetterToLabels
+        if (!tinyPinyin) {
+            tinyPinyin = await import("https://cdn.skypack.dev/tiny-pinyin")
         }
-    }
 
-    function showFirstLetterTags() {
-        const tagBtns = document.querySelectorAll(".tag-btn")
-        tagBtns.forEach((btn) => {
-            if (firstLetterTags.includes(btn.dataset.tag)) {
-                btn.style.display = ""
-            } else {
-                btn.style.display = "none"
+        // 构造一个字母到标签的映射
+        const letterToLabels = {}
+        Array.from(labels).forEach((label) => {
+            const pinyin = tinyPinyin.default.parse(label)[0].target.toUpperCase()
+            const letter = pinyin[0]
+            if (!letterToLabels[letter]) {
+                letterToLabels[letter] = []
             }
+            letterToLabels[letter].push(label)
         })
+
+        // 按字母顺序重新排列这个映射并赋值给全局变量sortedLetterToLabels
+        for (const letter of "ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
+            if (letterToLabels[letter]) {
+                sortedLetterToLabels[letter] = letterToLabels[letter].sort()
+            }
+        }
+
+        // console.log(sortedLetterToLabels)
+
+        return sortedLetterToLabels
     }
 
-    // Add this new function to show tags for a specific letter
+    // 点击字母时显示对应的标签
     function showTagsForLetter(letter) {
         const tags = sortedLetterToLabels[letter] || []
         const tagBtns = document.querySelectorAll(".tag-btn")
@@ -307,8 +307,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // 显示第一个元素的标签
         const firstLetter = Object.keys(sortedLetterToLabels)[0]
         if (firstLetter) {
-            firstLetterTags = sortedLetterToLabels[firstLetter]
-            showFirstLetterTags()
+            showTagsForLetter(firstLetter)
 
             // 设置第一个字母为选中状态
             const firstLetterItem = document.querySelector(`.letter-item[data-letter="${firstLetter}"]`)
@@ -327,35 +326,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 </a>`
         }
 
-        // 添加这行来附加事件监听器
+        // 给标签附加事件监听器
         attachTagEventListeners()
 
         // 给字母附加事件监听器
-        const letterItems = document.querySelectorAll(".letter-item")
-        letterItems.forEach((item) => {
-            const handleLetterSelection = (e) => {
-                e.preventDefault()
-                if (selectedTags.size === 0 && searchInput.value.length === 0) {
-                    const letter = item.dataset.letter
-                    const tags = sortedLetterToLabels[letter] || []
-                    const tagBtns = document.querySelectorAll(".tag-btn")
-                    tagBtns.forEach((btn) => {
-                        if (tags.includes(btn.dataset.tag)) {
-                            btn.style.display = ""
-                        } else {
-                            btn.style.display = "none"
-                        }
-                    })
-
-                    // 更新选中字母的样式
-                    letterItems.forEach((letterItem) => letterItem.classList.remove("active"))
-                    item.classList.add("active")
-                }
-            }
-
-            item.addEventListener("click", handleLetterSelection)
-            item.addEventListener("touchstart", handleLetterSelection)
-        })
+        attachLetterEventListeners()
     }
 
     async function main() {
@@ -427,6 +402,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const fetchMetadataBtn = document.getElementById("fetch-metadata-btn")
         const saveBookmarkBtn = document.getElementById("save-bookmark-btn")
         const urlInput = document.getElementById("bookmark-url-input")
+        urlInput.focus()
         const titleInput = document.getElementById("bookmark-title-input")
         const descriptionInput = document.getElementById("bookmark-description-input")
         const choseTagsContainer = document.getElementById("chose-tags-container")
