@@ -24,8 +24,13 @@ body {
     padding: 2rem;
 }
 
-h1 {
+a.h1 {
+    display: block;
+    width: fit-content;
+    margin: 0.67em auto;
+    text-decoration: none;
     text-align: center;
+    font-weight: bold;
     letter-spacing: 0.1em;
     color: var(--accent-color);
     margin-bottom: 2rem;
@@ -61,48 +66,34 @@ h1 {
     opacity: 0.7;
 }
 
-/* Other CSS styles */
 #letters-container {
     display: flex;
-    justify-content: flex-start;
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    padding: 0.5rem 0;
+    justify-content: center;
     margin-bottom: 2rem;
     flex-wrap: wrap;
 }
 
-#letters-container::-webkit-scrollbar {
-    display: none;
-}
-
 .letter-item {
-    flex: 0 0 auto;
-    padding: 0.5rem 0.75rem;
-    margin: 0 0.25rem;
+    padding: 0.25rem 0.75rem;
+    margin: 0 0.3rem;
     cursor: pointer;
     border: 1px solid var(--accent-color);
     border-radius: 4px;
     transition: all 0.3s ease;
 }
 
-.letter-item:hover {
+/* .letter-item:hover {
     background-color: var(--accent-color);
     color: var(--bg-color);
-}
+} */
 
 .letter-item.active {
     background-color: var(--accent-color);
     color: var(--bg-color);
     font-weight: bold;
-    transform: scale(1.1);
+    transform: scale(1.25);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
-
-/* Rest of CSS styles */
 
 #tags-container {
     display: flex;
