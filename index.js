@@ -4,6 +4,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
     console.log("是否为移动设备：", isMobile)
 
+    // 相关标签
+    const relatedTags = new Set()
+    // 已选标签
     const selectedTags = new Set()
     let debounceTimer
     let tinyPinyin
@@ -11,11 +14,11 @@ document.addEventListener("DOMContentLoaded", () => {
     let activeLetter
 
     // 处理不同设备的点击事件
-    function handleClick(button, func) {
+    function handleClick(element, func) {
         if (isMobile) {
-            button.addEventListener("touchend", func)
+            element.addEventListener("touchend", func)
         } else {
-            button.addEventListener("click", func)
+            element.addEventListener("click", func)
         }
     }
 
@@ -29,14 +32,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function filterBookmarks() {
         const bookmarks = document.querySelectorAll(".bookmark")
-        const searchTerm = searchInput.value.toLowerCase()
-        const visibleTags = new Set()
+        const searchTerm = searchInput.value.trim().toLowerCase()
 
         bookmarks.forEach((bookmark) => {
             const title = bookmark.querySelector(".bookmark-title").textContent.toLowerCase()
-            const desc = bookmark.querySelector(".bookmark-desc")?.textContent.toLowerCase() || ""
+            const desc = bookmark.querySelector(".bookmark-desc").textContent.toLowerCase() || ""
             const tags = new Set(bookmark.dataset.tags.split(","))
 
+            // 标签匹配，如果没有任何标签被选中，或者bookmark包含所有选中的标签
             const matchesTags = selectedTags.size === 0 || [...selectedTags].every((tag) => tags.has(tag))
             const matchesSearch = title.includes(searchTerm) || desc.includes(searchTerm)
 
@@ -44,33 +47,31 @@ document.addEventListener("DOMContentLoaded", () => {
             bookmark.style.display = isVisible ? "" : "none"
 
             if (isVisible) {
-                tags.forEach((tag) => visibleTags.add(tag))
+                tags.forEach((tag) => relatedTags.add(tag))
             }
         })
+        // console.log("相关标签：", relatedTags)
 
         // 每次过滤后更新字母导航栏
         const hasActiveFilters = selectedTags.size > 0 || searchTerm.length > 0
         if (hasActiveFilters) {
-            updateVisibleTags(visibleTags)
             toggleLettersVisibility(false)
+            updateRelatedTagsVisibility()
         } else {
-            showTagsForLetter(activeLetter)
             toggleLettersVisibility(true)
+            showTagsForLetter(activeLetter)
         }
+        relatedTags.clear()
     }
 
-    function updateVisibleTags(visibleTags) {
+    function updateRelatedTagsVisibility() {
         const tagButtons = document.querySelectorAll(".tag-btn")
         tagButtons.forEach((button) => {
             const tag = button.dataset.tag
-            if (visibleTags.has(tag)) {
+            if (relatedTags.has(tag)) {
                 button.style.display = ""
             } else {
                 button.style.display = "none"
-                if (selectedTags.has(tag)) {
-                    selectedTags.delete(tag)
-                    button.classList.remove("active")
-                }
             }
         })
     }
@@ -113,20 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 e.preventDefault()
                 if (selectedTags.size === 0 && searchInput.value.length === 0) {
                     const letter = item.dataset.letter
-                    const tags = sortedLetterToLabels[letter]
-                    const tagBtns = document.querySelectorAll(".tag-btn")
-                    tagBtns.forEach((btn) => {
-                        if (tags.includes(btn.dataset.tag)) {
-                            btn.style.display = ""
-                        } else {
-                            btn.style.display = "none"
-                        }
-                    })
-
-                    // 更新选中字母的样式
-                    letterItems.forEach((letterItem) => letterItem.classList.remove("active"))
-                    item.classList.add("active")
-                    activeLetter = item.dataset.letter
+                    showTagsForLetter(letter)
                 }
             }
 
@@ -273,14 +261,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 sortedLetterToLabels[letter] = letterToLabels[letter].sort()
             }
         }
-
         // console.log(sortedLetterToLabels)
-
-        return sortedLetterToLabels
     }
 
     // 点击字母时显示对应的标签
     function showTagsForLetter(letter) {
+        document.querySelectorAll(".letter-item").forEach(item => item.classList.remove("active"))
+        activeLetter = letter
+        document.querySelector(`.letter-item[data-letter="${letter}"]`).classList.add("active")
         const tags = sortedLetterToLabels[letter] || []
         const tagBtns = document.querySelectorAll(".tag-btn")
         tagBtns.forEach((btn) => {
@@ -304,16 +292,9 @@ document.addEventListener("DOMContentLoaded", () => {
         for (const label of Object.values(sortedLetterToLabels).flat()) {
             tagsContainer.innerHTML += `<button class="tag-btn" data-tag="${label}">${label}</button>`
         }
-        // 显示第一个元素的标签
-        const firstLetter = Object.keys(sortedLetterToLabels)[0]
-        if (firstLetter) {
-            showTagsForLetter(firstLetter)
-
-            // 设置第一个字母为选中状态
-            const firstLetterItem = document.querySelector(`.letter-item[data-letter="${firstLetter}"]`)
-            if (firstLetterItem) {
-                firstLetterItem.classList.add("active")
-            }
+        // 初始化时显示第一个字母的标签
+        if (!activeLetter) {
+            showTagsForLetter(Object.keys(sortedLetterToLabels)[0])
         }
         const bookmarksContainer = document.getElementById("bookmarks-container")
         bookmarksContainer.innerHTML = "" // 清空现有的书签
@@ -354,8 +335,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const issues = await getAllIssues(repo, headers)
-            const labels = await extractLabels(issues)
-            renderPage(issues, labels)
+            await extractLabels(issues)
+            renderPage(issues, sortedLetterToLabels)
             document.getElementById("add-bookmark-btn").style.display = "flex"
         } catch (error) {
             console.error(error)
