@@ -106,7 +106,6 @@ a.h1 {
     transition: background-color 0.3s ease;
 }
 
-.tag-btn:hover,
 .tag-btn.active {
     background-color: var(--accent-color);
 }
