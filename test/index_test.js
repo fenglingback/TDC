@@ -10,6 +10,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const sortedLetterToLabels = {}
     let activeLetter
 
+    // 处理不同设备的点击事件
+    function handleClick(button, func) {
+        if (isMobile) {
+            button.addEventListener("touchend", func)
+        } else {
+            button.addEventListener("click", func)
+        }
+    }
+
     function debounce(func, delay) {
         return function () {
             const args = arguments
@@ -91,11 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 filterBookmarks()
             }
 
-            if (isMobile) {
-                button.addEventListener("touchstart", handleTagSelection)
-            } else {
-                button.addEventListener("click", handleTagSelection)
-            }
+            handleClick(button, handleTagSelection)
         })
     }
 
@@ -125,12 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
-            if (isMobile) {
-                item.addEventListener("touchstart", handleLetterSelection)
-            }
-            else {
-                item.addEventListener("click", handleLetterSelection)
-            }
+            handleClick(item, handleLetterSelection)
         })
     }
 
@@ -224,11 +224,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const issues_data = issues.map((issue) => {
             let [url, desc] = []
             if (issue.body.includes("\n\n")) {
-                ;[url, desc] = issue.body.split("\n\n")
+                [url, desc] = issue.body.split("\n\n")
             } else if (issue.body.includes("\r\n\r\n")) {
-                ;[url, desc] = issue.body.split("\r\n\r\n")
+                [url, desc] = issue.body.split("\r\n\r\n")
             } else {
-                ;[url, desc] = [issue.body, ""]
+                [url, desc] = [issue.body, ""]
             }
 
             return {
@@ -239,7 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         })
 
-        // console.log(issues_data);
+        // console.log(issues_data)
         return issues_data
     }
 
@@ -274,7 +274,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // console.log(sortedLetterToLabels);
+        // console.log(sortedLetterToLabels)
 
         return sortedLetterToLabels
     }
