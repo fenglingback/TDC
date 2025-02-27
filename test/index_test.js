@@ -128,6 +128,52 @@ document.addEventListener("DOMContentLoaded", () => {
         lettersContainer.style.display = show ? "" : "none"
     }
 
+    function attachBookmarkEventListeners() {
+        const bookmarks = document.querySelectorAll(".bookmark")
+        bookmarks.forEach((bookmark) => {
+            const desc = bookmark.querySelector(".bookmark-desc")
+
+            if (isMobile) {
+                // 长按事件
+                const longPressTimeout = 1000
+                let Timer
+                bookmark.addEventListener("touchstart", (e) => {
+                    e.preventDefault()
+                    if (bookmark.classList.contains("bookmark-hover")) {
+                        bookmark.classList.remove("bookmark-hover")
+                        desc.style.display = ""
+                    } else {
+                        Timer = setTimeout(() => {
+                            bookmark.classList.add("bookmark-hover")
+                            desc.style.display = "block"
+                        }, longPressTimeout)
+                    }
+                })
+
+                bookmark.addEventListener("touchend", () => {
+                    clearTimeout(Timer)
+                    Timer = null
+                })
+
+                bookmark.addEventListener("touchmove", () => {
+                    clearTimeout(Timer)
+                    Timer = null
+                })
+
+
+            } else {
+                bookmark.addEventListener("mouseover", () => {
+                    bookmark.classList.add("bookmark-hover")
+                    desc.style.display = "block"
+                })
+                bookmark.addEventListener("mouseout", () => {
+                    bookmark.classList.remove("bookmark-hover")
+                    desc.style.display = ""
+                })
+            }
+        })
+    }
+
     function showDialog() {
         const dialog = document.createElement("div")
         dialog.innerHTML = `
@@ -306,6 +352,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="bookmark-tags"><span>${issue.labels.join("</span><span>")}</span></div>
                 </a>`
         }
+
+        // 给书签附加事件监听器
+        attachBookmarkEventListeners()
 
         // 给标签附加事件监听器
         attachTagEventListeners()
