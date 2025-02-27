@@ -16,7 +16,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // 处理不同设备的点击事件
     function handleClick(element, func) {
         if (isMobile) {
-            element.addEventListener("touchend", func)
+            let isMove = false
+            element.addEventListener("touchstart", () => {
+                isMove = false
+            })
+            element.addEventListener("touchmove", () => {
+                isMove = true
+            })
+            element.addEventListener("touchend", () => {
+                if (!isMove) {
+                    func()
+                }
+            })
         } else {
             element.addEventListener("click", func)
         }
@@ -134,33 +145,19 @@ document.addEventListener("DOMContentLoaded", () => {
             const desc = bookmark.querySelector(".bookmark-desc")
 
             if (isMobile) {
-                // 长按事件
-                const longPressTimeout = 1000
-                let Timer
-                bookmark.addEventListener("touchstart", (e) => {
+                // 在移动设备上，点击书签时显示描述，再次点击时在新标签页中打开书签链接
+                bookmark.addEventListener("click", (e) => {
                     e.preventDefault()
                     if (bookmark.classList.contains("bookmark-hover")) {
                         bookmark.classList.remove("bookmark-hover")
                         desc.style.display = ""
+                        // 新标签页打开书签链接
+                        window.open(bookmark.href, "_blank")
                     } else {
-                        Timer = setTimeout(() => {
-                            bookmark.classList.add("bookmark-hover")
-                            desc.style.display = "block"
-                        }, longPressTimeout)
+                        bookmark.classList.add("bookmark-hover")
+                        desc.style.display = "block"
                     }
                 })
-
-                bookmark.addEventListener("touchend", () => {
-                    clearTimeout(Timer)
-                    Timer = null
-                })
-
-                bookmark.addEventListener("touchmove", () => {
-                    clearTimeout(Timer)
-                    Timer = null
-                })
-
-
             } else {
                 bookmark.addEventListener("mouseover", () => {
                     bookmark.classList.add("bookmark-hover")
