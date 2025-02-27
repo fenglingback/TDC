@@ -17,17 +17,16 @@ document.addEventListener("DOMContentLoaded", () => {
     function handleClick(element, func) {
         if (isMobile) {
             let isMove = false
-            element.addEventListener("touchstart", function () {
-                isMove = false
-            })
-            element.addEventListener("touchmove", function () {
+            element.addEventListener("touchmove", (e) => {
                 isMove = true
             })
-            element.addEventListener("touchend", function () {
+            element.addEventListener("touchend", (e) => {
                 if (!isMove) {
-                    func()
+                    func(e)
                 }
+                isMove = false
             })
+
         } else {
             element.addEventListener("click", func)
         }
@@ -158,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         desc.style.display = "block"
                     }
                 })
-
+                // 触摸移动时隐藏描述
                 bookmark.addEventListener("touchmove", () => {
                     bookmark.classList.remove("bookmark-hover")
                     desc.style.display = ""
