@@ -17,13 +17,13 @@ document.addEventListener("DOMContentLoaded", () => {
     function handleClick(element, func) {
         if (isMobile) {
             let isMove = false
-            element.addEventListener("touchstart", () => {
+            element.addEventListener("touchstart", function () {
                 isMove = false
             })
-            element.addEventListener("touchmove", () => {
+            element.addEventListener("touchmove", function () {
                 isMove = true
             })
-            element.addEventListener("touchend", () => {
+            element.addEventListener("touchend", function () {
                 if (!isMove) {
                     func()
                 }
@@ -157,6 +157,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         bookmark.classList.add("bookmark-hover")
                         desc.style.display = "block"
                     }
+                })
+
+                bookmark.addEventListener("touchmove", () => {
+                    bookmark.classList.remove("bookmark-hover")
+                    desc.style.display = ""
                 })
             } else {
                 bookmark.addEventListener("mouseover", () => {
