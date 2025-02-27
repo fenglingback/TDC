@@ -16,7 +16,17 @@ document.addEventListener("DOMContentLoaded", () => {
     // 处理不同设备的点击事件
     function handleClick(element, func) {
         if (isMobile) {
-            element.addEventListener("touchend", func)
+            let isMove = false
+            element.addEventListener("touchmove", (e) => {
+                isMove = true
+            })
+            element.addEventListener("touchend", (e) => {
+                if (!isMove) {
+                    func(e)
+                }
+                isMove = false
+            })
+
         } else {
             element.addEventListener("click", func)
         }
@@ -126,6 +136,44 @@ document.addEventListener("DOMContentLoaded", () => {
     function toggleLettersVisibility(show) {
         const lettersContainer = document.getElementById("letters-container")
         lettersContainer.style.display = show ? "" : "none"
+    }
+
+    // 将书签事件侦听器设置移至单独的功能
+    function attachBookmarkEventListeners() {
+        const bookmarks = document.querySelectorAll(".bookmark")
+        bookmarks.forEach((bookmark) => {
+            const desc = bookmark.querySelector(".bookmark-desc")
+
+            if (isMobile) {
+                // 在移动设备上，点击书签时显示描述，再次点击时在新标签页中打开书签链接
+                bookmark.addEventListener("click", (e) => {
+                    e.preventDefault()
+                    if (bookmark.classList.contains("bookmark-hover")) {
+                        bookmark.classList.remove("bookmark-hover")
+                        desc.style.display = ""
+                        // 新标签页打开书签链接
+                        window.open(bookmark.href, "_blank")
+                    } else {
+                        bookmark.classList.add("bookmark-hover")
+                        desc.style.display = "block"
+                    }
+                })
+                // 触摸移动时隐藏描述
+                bookmark.addEventListener("touchmove", () => {
+                    bookmark.classList.remove("bookmark-hover")
+                    desc.style.display = ""
+                })
+            } else {
+                bookmark.addEventListener("mouseover", () => {
+                    bookmark.classList.add("bookmark-hover")
+                    desc.style.display = "block"
+                })
+                bookmark.addEventListener("mouseout", () => {
+                    bookmark.classList.remove("bookmark-hover")
+                    desc.style.display = ""
+                })
+            }
+        })
     }
 
     function showDialog() {
@@ -306,6 +354,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="bookmark-tags"><span>${issue.labels.join("</span><span>")}</span></div>
                 </a>`
         }
+
+        // 给书签附加事件监听器
+        attachBookmarkEventListeners()
 
         // 给标签附加事件监听器
         attachTagEventListeners()

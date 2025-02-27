@@ -129,13 +129,9 @@ a.h1 {
     gap: 10px;
 }
 
-.bookmark:hover {
+.bookmark-hover {
     transform: translateY(-5px);
     background-color: var(--bm-bg);
-
-    .bookmark-desc {
-        display: block;
-    }
 }
 
 .bookmark-title {

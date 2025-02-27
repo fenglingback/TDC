@@ -138,6 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
         lettersContainer.style.display = show ? "" : "none"
     }
 
+    // 将书签事件侦听器设置移至单独的功能
     function attachBookmarkEventListeners() {
         const bookmarks = document.querySelectorAll(".bookmark")
         bookmarks.forEach((bookmark) => {
