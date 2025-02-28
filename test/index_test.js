@@ -148,9 +148,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 let isClick = true
                 bookmark.addEventListener("contextmenu", (e) => {
                     e.preventDefault()
+                    isClick = false
                     bookmark.classList.add("bookmark-hover")
                     desc.style.display = "block"
-                    isClick = false
                 })
                 bookmark.addEventListener("touchmove", (e) => {
                     isClick = false

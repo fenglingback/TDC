@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (isMobile) {
                 // 在移动设备上，点击书签时显示描述，再次点击时在新标签页中打开书签链接
-                bookmark.addEventListener("click", (e) => {
+                const handleBookmarkClick = (e) => {
                     e.preventDefault()
                     if (bookmark.classList.contains("bookmark-hover")) {
                         bookmark.classList.remove("bookmark-hover")
@@ -157,7 +157,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         bookmark.classList.add("bookmark-hover")
                         desc.style.display = "block"
                     }
-                })
+                }
+                handleClick(bookmark, handleBookmarkClick)
                 // 触摸移动时隐藏描述
                 bookmark.addEventListener("touchmove", () => {
                     bookmark.classList.remove("bookmark-hover")
