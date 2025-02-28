@@ -145,18 +145,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const desc = bookmark.querySelector(".bookmark-desc")
 
             if (isMobile) {
-                let Timer
                 let isClick = true
-                bookmark.addEventListener("touchstart", (e) => {
-                    Timer = setTimeout(() => {
-                        bookmark.classList.add("bookmark-hover")
-                        desc.style.display = "block"
-                        isClick = false
-                        e.preventDefault()
-                    }, 500)
+                bookmark.addEventListener("contextmenu", (e) => {
+                    e.preventDefault()
+                    bookmark.classList.add("bookmark-hover")
+                    desc.style.display = "block"
+                    isClick = false
                 })
-                bookmark.addEventListener("touchmove", () => {
-                    clearTimeout(Timer)
+                bookmark.addEventListener("touchmove", (e) => {
                     isClick = false
                     bookmark.classList.remove("bookmark-hover")
                     desc.style.display = ""
@@ -169,7 +165,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         bookmark.classList.remove("bookmark-hover")
                         desc.style.display = ""
                     }
-                    clearTimeout(Timer)
                     isClick = true
                 })
             } else {
