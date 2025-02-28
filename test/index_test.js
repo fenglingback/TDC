@@ -151,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     isClick = false
                     bookmark.classList.add("bookmark-hover")
                     desc.style.display = "block"
-                })
+                }, { passive: false})
                 bookmark.addEventListener("touchmove", (e) => {
                     isClick = false
                     bookmark.classList.remove("bookmark-hover")
