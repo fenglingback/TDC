@@ -148,11 +148,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 let Timer
                 let isClick = true
                 bookmark.addEventListener("touchstart", (e) => {
-                    e.preventDefault()
                     Timer = setTimeout(() => {
                         bookmark.classList.add("bookmark-hover")
                         desc.style.display = "block"
                         isClick = false
+                        e.preventDefault()
                     }, 500)
                 })
                 bookmark.addEventListener("touchmove", () => {
