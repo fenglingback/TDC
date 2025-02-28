@@ -145,23 +145,32 @@ document.addEventListener("DOMContentLoaded", () => {
             const desc = bookmark.querySelector(".bookmark-desc")
 
             if (isMobile) {
-                // 在移动设备上，点击书签时显示描述，再次点击时在新标签页中打开书签链接
-                bookmark.addEventListener("click", (e) => {
+                let Timer
+                let isClick = true
+                bookmark.addEventListener("touchstart", (e) => {
                     e.preventDefault()
-                    if (bookmark.classList.contains("bookmark-hover")) {
-                        bookmark.classList.remove("bookmark-hover")
-                        desc.style.display = ""
-                        // 新标签页打开书签链接
-                        window.open(bookmark.href, "_blank")
-                    } else {
+                    Timer = setTimeout(() => {
                         bookmark.classList.add("bookmark-hover")
                         desc.style.display = "block"
-                    }
+                        isClick = false
+                    }, 500)
                 })
-                // 触摸移动时隐藏描述
                 bookmark.addEventListener("touchmove", () => {
+                    clearTimeout(Timer)
+                    isClick = false
                     bookmark.classList.remove("bookmark-hover")
                     desc.style.display = ""
+                })
+
+                bookmark.addEventListener("touchend", () => {
+                    if (isClick) {
+                        // 新标签页打开书签链接
+                        window.open(bookmark.href, "_blank")
+                        bookmark.classList.remove("bookmark-hover")
+                        desc.style.display = ""
+                    }
+                    clearTimeout(Timer)
+                    isClick = true
                 })
             } else {
                 bookmark.addEventListener("mouseover", () => {
