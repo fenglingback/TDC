@@ -145,24 +145,29 @@ document.addEventListener("DOMContentLoaded", () => {
             const desc = bookmark.querySelector(".bookmark-desc")
 
             if (isMobile) {
-                // 在移动设备上，点击书签时显示描述，再次点击时在新标签页中打开书签链接
-                const handleBookmarkClick = (e) => {
+                // 在移动设备上，点击书签时显示描述
+                handleClick(bookmark, (e) => {
                     e.preventDefault()
-                    if (bookmark.classList.contains("bookmark-hover")) {
-                        bookmark.classList.remove("bookmark-hover")
-                        desc.style.display = ""
-                        // 新标签页打开书签链接
-                        window.open(bookmark.href, "_blank")
-                    } else {
+                    if (!bookmark.classList.contains("bookmark-hover")) {
                         bookmark.classList.add("bookmark-hover")
                         desc.style.display = "block"
                     }
-                }
-                handleClick(bookmark, handleBookmarkClick)
+                })
                 // 触摸移动时隐藏描述
                 bookmark.addEventListener("touchmove", () => {
                     bookmark.classList.remove("bookmark-hover")
                     desc.style.display = ""
+                })
+                // 按钮点击时在新标签页中打开书签链接
+                const target = bookmark.querySelector(".bookmark-target")
+                handleClick(target, (e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    window.open(bookmark.href, "_blank")
+                    if (bookmark.classList.contains("bookmark-hover")) {
+                        bookmark.classList.remove("bookmark-hover")
+                        desc.style.display = ""
+                    }
                 })
             } else {
                 bookmark.addEventListener("mouseover", () => {
@@ -350,9 +355,12 @@ document.addEventListener("DOMContentLoaded", () => {
         for (const issue of issues_data) {
             bookmarksContainer.innerHTML += `
                 <a href="${issue.url}" target="_blank" class="bookmark" data-tags="${issue.labels.join(",")}" rel="noopener noreferrer">
-                    <span class="bookmark-title">${issue.title}</span>
-                    <div class="bookmark-desc">${issue.desc}</div>
-                    <div class="bookmark-tags"><span>${issue.labels.join("</span><span>")}</span></div>
+                    <div class="bookmark-info">
+                        <span class="bookmark-title">${issue.title}</span>
+                        <div class="bookmark-desc">${issue.desc}</div>
+                        <div class="bookmark-tags"><span>${issue.labels.join("</span><span>")}</span></div>
+                    </div>
+                    ${isMobile ? `<div class="bookmark-target"><svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /><path d="M15 16l4 -4" /><path d="M15 8l4 4" /></svg></div>` : ""}
                 </a>`
         }
 
