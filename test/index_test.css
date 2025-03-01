@@ -5,8 +5,6 @@
     --secondary-bg: #1d2c53dc;
     --bm-bg: #912964;
     --desc-color: #e0e0e0b3;
-    --target-color: #0077d8;
-    
     --chosen-color: #b8548d;
     scrollbar-width: none;
 }
@@ -174,8 +172,8 @@ a.h1 {
 }
 
 .bookmark-target {
-    width: 20%;
-    background-color: var(--target-color);
+    width: 18%;
+    background: linear-gradient(to bottom right, #193c87, #266e6c);
     border-radius: 0 10px 10px 0;
     display: flex;
     justify-content: center;
