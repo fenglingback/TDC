@@ -445,7 +445,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const fetchMetadataBtn = document.getElementById("fetch-metadata-btn")
         const saveBookmarkBtn = document.getElementById("save-bookmark-btn")
         const urlInput = document.getElementById("bookmark-url-input")
-        urlInput.focus()
+        if (!isMobile) {
+            urlInput.focus()
+        }
         const titleInput = document.getElementById("bookmark-title-input")
         const descriptionInput = document.getElementById("bookmark-description-input")
         const choseTagsContainer = document.getElementById("chose-tags-container")
