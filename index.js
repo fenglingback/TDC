@@ -432,8 +432,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
                 <input type="text" id="bookmark-title-input" placeholder="标题">
                 <textarea id="bookmark-description-input" placeholder="描述"></textarea>
-                <button id="save-bookmark-btn">保存书签</button>
-                <button id="close-dialog-btn">关闭</button>
+                <div class="button-container">
+                    <button id="save-bookmark-btn">保存书签</button>
+                    <button id="close-dialog-btn">关闭</button>
+                </div>
             </div>
         `
         document.body.appendChild(dialog)

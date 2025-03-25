@@ -407,7 +407,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const addBookmarkBtn = document.getElementById("add-bookmark-btn")
 
-    addBookmarkBtn.addEventListener("click", () => {
+    handleClick(addBookmarkBtn, (e) => {
         if (!localStorage.getItem("githubToken") || !localStorage.getItem("bmRepo")) {
             showDialog()
             return
@@ -432,8 +432,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
                 <input type="text" id="bookmark-title-input" placeholder="标题">
                 <textarea id="bookmark-description-input" placeholder="描述"></textarea>
-                <button id="save-bookmark-btn">保存书签</button>
-                <button id="close-dialog-btn">关闭</button>
+                <div class="button-container">
+                    <button id="save-bookmark-btn">保存书签</button>
+                    <button id="close-dialog-btn">关闭</button>
+                </div>
             </div>
         `
         document.body.appendChild(dialog)
@@ -459,10 +461,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         function checkTagsListDisplay() {
+            // 如果所有标签都被隐藏，则隐藏标签列表
             if (Array.from(tags).filter((tag) => tag.style.display !== "none").length === 0) {
                 changeTagsListDisplay(false)
             } else {
                 changeTagsListDisplay(true)
+                tagsInput.focus()
             }
         }
 

@@ -215,8 +215,9 @@ a.h1 {
 }
 
 .dialog-content :is(input:not([type=checkbox]), textarea) {
+    outline: none;
     width: 100%;
-    padding: 8px 0;
+    padding: 8px 4px;
     border: 1px solid var(--accent-color);
     border-radius: 5px;
     background-color: var(--bg-color);
@@ -248,6 +249,15 @@ a.h1 {
 }
 
 .url-container input {
+    flex: 1;
+}
+
+.button-container {
+    display: flex;
+    gap: 10px;
+}
+
+.button-container button {
     flex: 1;
 }
 

@@ -1,8 +1,8 @@
 :root {
     --bg-color: #1a1a2e;
     --text-color: #e0e0e0;
-    --accent-color: #a277ff;
-    --secondary-bg: #1d2c53dc;
+    --accent-color: #2f2fcb;
+    --secondary-bg: #08080ec7;
     --bm-bg: #912964;
     --desc-color: #e0e0e0b3;
     --chosen-color: #b8548d;
@@ -117,7 +117,7 @@ a.h1 {
 }
 
 .bookmark {
-    background-color: var(--secondary-bg);
+    background-color: rgba(255, 255, 255, 0.07);
     border-radius: 10px;
     text-decoration: none;
     color: var(--text-color);
@@ -137,7 +137,8 @@ a.h1 {
 
 .bookmark-hover {
     transform: translateY(-5px);
-    background-color: var(--bm-bg);
+    background-color: var(--secondary-bg);
+    border: 2px solid #e65100;
 }
 
 .bookmark-title {
@@ -164,7 +165,7 @@ a.h1 {
 }
 
 .bookmark-tags span {
-    background-color: #00ffe196;
+    background-color: #29b7a6c0;
     color: #222222;
     border-radius: 5px;
     padding: 0 4px;
@@ -197,6 +198,7 @@ a.h1 {
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: var(--secondary-bg);
+    border: 2px solid #e65100;
     padding: 20px;
     border-radius: 10px;
     z-index: 1001;
@@ -215,8 +217,9 @@ a.h1 {
 }
 
 .dialog-content :is(input:not([type=checkbox]), textarea) {
+    outline: none;
     width: 100%;
-    padding: 8px 0;
+    padding: 8px 4px;
     border: 1px solid var(--accent-color);
     border-radius: 5px;
     background-color: var(--bg-color);
@@ -231,8 +234,8 @@ a.h1 {
 }
 
 .dialog-content button {
-    background-color: var(--accent-color);
-    color: var(--bg-color);
+    background-color: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
     border: none;
     padding: 8px 15px;
     border-radius: 5px;
@@ -244,10 +247,18 @@ a.h1 {
     align-items: center;
     justify-items: center;
     gap: 10px;
-    flex: 1;
 }
 
 .url-container input {
+    flex: 1;
+}
+
+.button-container {
+    display: flex;
+    gap: 10px;
+}
+
+.button-container button {
     flex: 1;
 }
 
