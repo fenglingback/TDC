@@ -5,8 +5,8 @@
 :root {
     --bg-color: #1a1a2e;
     --text-color: #e0e0e0;
-    --accent-color: #325bd8;
-    --secondary-bg: #08080ec7;
+    --accent-color: #a277ff;
+    --secondary-bg: #1d2c53dc;
     --bm-bg: #912964;
     --desc-color: #e0e0e0b3;
     --chosen-color: #b8548d;
@@ -121,9 +121,8 @@ a.h1 {
 }
 
 .bookmark {
-    background-color: rgba(255, 255, 255, 0.07);
+    background-color: var(--secondary-bg);
     border-radius: 10px;
-    border: 2px solid #ffffff00;
     text-decoration: none;
     color: var(--text-color);
     transition: all 0.3s ease;
@@ -142,8 +141,7 @@ a.h1 {
 
 .bookmark-hover {
     transform: translateY(-5px);
-    background-color: var(--secondary-bg);
-    border: 2px solid #e65100;
+    background-color: var(--bm-bg);
 }
 
 .bookmark-title {
@@ -170,7 +168,7 @@ a.h1 {
 }
 
 .bookmark-tags span {
-    background-color: #29b7a6c0;
+    background-color: #00ffe196;
     color: #222222;
     border-radius: 5px;
     padding: 0 4px;
@@ -203,7 +201,6 @@ a.h1 {
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: var(--secondary-bg);
-    border: 2px solid #e65100;
     padding: 20px;
     border-radius: 10px;
     z-index: 1001;
@@ -239,8 +236,8 @@ a.h1 {
 }
 
 .dialog-content button {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: var(--text-color);
+    background-color: var(--accent-color);
+    color: var(--bg-color);
     border: none;
     padding: 8px 15px;
     border-radius: 5px;
@@ -252,6 +249,7 @@ a.h1 {
     align-items: center;
     justify-items: center;
     gap: 10px;
+    flex: 1;
 }
 
 .url-container input {
