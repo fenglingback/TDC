@@ -302,17 +302,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const letterToLabels = {}
         Array.from(labels).forEach((label) => {
             const pinyin = tinyPinyin.default.parse(label)[0].target.toUpperCase()
-            const letter = pinyin[0]
+            const letter = /[A-Z]/.test(pinyin[0]) ? pinyin[0] : "#"
             if (!letterToLabels[letter]) {
                 letterToLabels[letter] = []
             }
             letterToLabels[letter].push(label)
         })
 
-        // 按字母顺序重新排列这个映射并赋值给全局变量sortedLetterToLabels
-        for (const letter of "ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
+        // 把映射的键按指定顺序排序
+        for (const letter of "ABCDEFGHIJKLMNOPQRSTUVWXYZ#") {
             if (letterToLabels[letter]) {
-                sortedLetterToLabels[letter] = letterToLabels[letter].sort()
+                // 对标签按字典顺序排序
+                sortedLetterToLabels[letter] = letterToLabels[letter].sort((a, b) => a.localeCompare(b))
             }
         }
         // console.log(sortedLetterToLabels)
