@@ -255,13 +255,15 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const data = await response.json()
-            if (data.length === 0) {
-                break
-            }
-
             issues = issues.concat(data)
-            page++
+            if (data.length < 100) {
+                break
+            } else {
+                page++
+            }
         }
+
+        searchInput.setAttribute("placeholder", `在 ${issues.length} 个书签中搜索`)
 
         const issues_data = issues.map((issue) => {
             let [url, desc] = []
