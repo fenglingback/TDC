@@ -453,17 +453,6 @@
 
         // ========== 本地 JSON 书签存储 ==========
         const STORAGE_KEY = "tdc_bookmarks"
-        const STORAGE_MODE_KEY = "tdc_storage_mode" // "github" | "local"
-
-        // 获取当前存储模式
-        function getStorageMode() {
-            return localStorage.getItem(STORAGE_MODE_KEY) || "local"
-        }
-
-        // 设置存储模式
-        function setStorageMode(mode) {
-            localStorage.setItem(STORAGE_MODE_KEY, mode)
-        }
 
         // 从 localStorage 读取书签数据
         function loadLocalBookmarks() {
@@ -479,22 +468,6 @@
         // 保存书签数据到 localStorage
         function saveLocalBookmarks(bookmarks) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(bookmarks, null, 2))
-        }
-
-        // 添加单条书签到本地
-        function addBookmarkToLocal(url, title, description, tags) {
-            const bookmarks = loadLocalBookmarks()
-            const newBookmark = {
-                id: Date.now(),
-                url: url,
-                title: title,
-                desc: description,
-                labels: tags,
-                createdAt: new Date().toISOString()
-            }
-            bookmarks.push(newBookmark)
-            saveLocalBookmarks(bookmarks)
-            return newBookmark
         }
 
         // 导出书签为 JSON 文件并下载
@@ -764,7 +737,6 @@
                     if (data.permissions.admin === true) {
                         localStorage.setItem("githubToken", token)
                         localStorage.setItem("bmRepo", repo)
-                        setStorageMode("github")
                         closeDialog()
                         main()
                     } else {
@@ -916,44 +888,29 @@
 
         async function main() {
             try {
-                const mode = getStorageMode()
-
-                if (mode === "github") {
-                    // GitHub 模式
-                    if (!localStorage.getItem("githubToken") || !localStorage.getItem("bmRepo")) {
-                        showDialog()
-                        return
-                    }
-
-                    console.log(
-                        "\n %c TDC %c https://github.com/fenglingback/TDC \n",
-                        "color: #0ca7a4; background-image: linear-gradient(90deg, #555555 0%, #555555 100%); padding:5px 1px;",
-                        "color: #a277ff; background-image: linear-gradient(90deg, #555555 0%, #1d294d 100%); padding:5px 0;",
-                    )
-
-                    const repo = localStorage.getItem("bmRepo")
-                    const token = localStorage.getItem("githubToken")
-                    const headers = {
-                        Authorization: `token ${token}`,
-                        Accept: "application/vnd.github.v3+json",
-                    }
-
-                    const issues = await getAllIssues(repo, headers)
-                    await extractLabels(issues)
-                    renderPage(issues, sortedLetterToLabels)
-                } else {
-                    // 本地 JSON 模式
-                    console.log(
-                        "\n %c TDC (本地模式) %c 书签保存在本地 JSON 文件 \n",
-                        "color: #0ca7a4; background-image: linear-gradient(90deg, #555555 0%, #555555 100%); padding:5px 1px;",
-                        "color: #a277ff; background-image: linear-gradient(90deg, #555555 0%, #1d294d 100%); padding:5px 0;",
-                    )
-
-                    const bookmarks = loadLocalBookmarks()
-                    searchInput.setAttribute("placeholder", `在 ${bookmarks.length} 个书签中搜索`)
-                    await extractLabels(bookmarks)
-                    renderPage(bookmarks, sortedLetterToLabels)
+                if (!localStorage.getItem("githubToken") || !localStorage.getItem("bmRepo")) {
+                    showDialog()
+                    return
                 }
+
+                console.log(
+                    "\n %c TDC %c https://github.com/fenglingback/TDC \n",
+                    "color: #0ca7a4; background-image: linear-gradient(90deg, #555555 0%, #555555 100%); padding:5px 1px;",
+                    "color: #a277ff; background-image: linear-gradient(90deg, #555555 0%, #1d294d 100%); padding:5px 0;",
+                )
+
+                const repo = localStorage.getItem("bmRepo")
+                const token = localStorage.getItem("githubToken")
+                const headers = {
+                    Authorization: `token ${token}`,
+                    Accept: "application/vnd.github.v3+json",
+                }
+
+                const issues = await getAllIssues(repo, headers)
+                // 同步到本地存储，供导出 JSON 使用
+                saveLocalBookmarks(issues)
+                await extractLabels(issues)
+                renderPage(issues, sortedLetterToLabels)
 
                 document.getElementById("add-bookmark-btn").style.display = "flex"
                 document.getElementById("export-json-btn").style.display = "flex"
@@ -967,13 +924,9 @@
         const addBookmarkBtn = document.getElementById("add-bookmark-btn")
 
         handleClick(addBookmarkBtn, (e) => {
-            const mode = getStorageMode()
-
-            if (mode === "github") {
-                if (!localStorage.getItem("githubToken") || !localStorage.getItem("bmRepo")) {
-                    showDialog()
-                    return
-                }
+            if (!localStorage.getItem("githubToken") || !localStorage.getItem("bmRepo")) {
+                showDialog()
+                return
             }
 
             const labels = Array.from(document.querySelectorAll(".tag-btn")).map((tagBtn) => tagBtn.dataset.tag)
@@ -1134,63 +1087,33 @@
                     return
                 }
 
-                if (mode === "github") {
-                    // GitHub 模式：保存为 Issue
-                    const repo = localStorage.getItem("bmRepo")
-                    const token = localStorage.getItem("githubToken")
+                const repo = localStorage.getItem("bmRepo")
+                const token = localStorage.getItem("githubToken")
 
-                    try {
-                        const response = await fetch(`https://api.github.com/repos/${repo}/issues`, {
-                            method: "POST",
-                            headers: {
-                                Authorization: `token ${token}`,
-                                Accept: "application/vnd.github.v3+json",
-                                "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({
-                                title: title,
-                                body: `${url}\n\n${description}`,
-                                labels: selectedTagBtns,
-                            }),
-                        })
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${repo}/issues`, {
+                        method: "POST",
+                        headers: {
+                            Authorization: `token ${token}`,
+                            Accept: "application/vnd.github.v3+json",
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            title: title,
+                            body: `${url}\n\n${description}`,
+                            labels: selectedTagBtns,
+                        }),
+                    })
 
-                        if (response.ok) {
-                            alert("书签已成功保存！")
-                            location.reload()
-                        } else {
-                            alert("保存书签时出错。请稍后再试。")
-                        }
-                    } catch (error) {
-                        console.error("Error saving bookmark:", error)
-                        alert("保存书签时出错。请检查您的网络连接和 GitHub 令牌。")
-                    }
-                } else {
-                    // 本地模式：保存到 localStorage + 自动导出 JSON 文件
-                    try {
-                        addBookmarkToLocal(url, title, description, selectedTagBtns)
-
-                        // 自动触发 JSON 文件下载
-                        const bookmarks = loadLocalBookmarks()
-                        const jsonStr = JSON.stringify(bookmarks, null, 2)
-                        const blob = new Blob([jsonStr], { type: "application/json" })
-                        const downloadUrl = URL.createObjectURL(blob)
-                        const a = document.createElement("a")
-                        a.href = downloadUrl
-                        a.download = `tdc_bookmarks.json`
-                        document.body.appendChild(a)
-                        a.click()
-                        document.body.removeChild(a)
-                        URL.revokeObjectURL(downloadUrl)
-
-                        showToast("书签已保存到本地 JSON 文件")
-                        // 关闭对话框并刷新
-                        document.body.removeChild(dialog)
-                        document.body.style.overflow = ""
+                    if (response.ok) {
+                        alert("书签已成功保存！")
                         location.reload()
-                    } catch (error) {
-                        console.error("Error saving bookmark locally:", error)
-                        alert("保存书签时出错。")
+                    } else {
+                        alert("保存书签时出错。请稍后再试。")
                     }
+                } catch (error) {
+                    console.error("Error saving bookmark:", error)
+                    alert("保存书签时出错。请检查您的网络连接和 GitHub 令牌。")
                 }
             })
         })
